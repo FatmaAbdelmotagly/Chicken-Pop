@@ -7,5 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="gluegen-rt1" level="application" />
+    <orderEntry type="library" name="jogl1" level="application" />
+    <orderEntry type="library" name="gluegen-rt2" level="application" />
   </component>
 </module>
