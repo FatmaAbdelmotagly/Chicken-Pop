@@ -51,7 +51,6 @@ public class Renderer implements GLEventListener {
             image.bind();
             gl.glBegin(GL.GL_QUADS);
 
-            // نقلب الصورة عموديًا
             gl.glTexCoord2f(0, 1); gl.glVertex2f(0, 0);
             gl.glTexCoord2f(1, 1); gl.glVertex2f(w, 0);
             gl.glTexCoord2f(1, 0); gl.glVertex2f(w, h);

@@ -29,7 +29,6 @@ public class Window {
                 frame.dispose();
                 System.exit(0);
 
-
             }
         });
     }
