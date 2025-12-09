@@ -46,6 +46,7 @@ public class Renderer implements GLEventListener {
         gl.glMatrixMode(GL.GL_MODELVIEW);
         gl.glLoadIdentity();
 
+
         if (image != null) {
             image.bind();
             gl.glBegin(GL.GL_QUADS);

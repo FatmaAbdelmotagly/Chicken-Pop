@@ -28,6 +28,8 @@ public class Window {
             public void windowClosing(WindowEvent e) {
                 frame.dispose();
                 System.exit(0);
+
+
             }
         });
     }
