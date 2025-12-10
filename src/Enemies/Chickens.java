@@ -4,5 +4,6 @@ public class Chickens {
     public Chickens(int x, int y){
         this.x=x;
         this.y=y;
+
     }
 }
