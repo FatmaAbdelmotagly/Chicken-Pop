@@ -1,4 +1,4 @@
-package Texture;
+package texture;
 
 public class Constants {
 }
