@@ -5,19 +5,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLEventListener;
-import javax.swing.*;
 
 public class Window {
 
     public Window() {
+        Frame frame = new Frame("Chicken Game Menu");
 
-        Frame frame = new Frame("Chicken pop");
         GLCapabilities caps = new GLCapabilities();
         GLCanvas canvas = new GLCanvas(caps);
 
-        Renderer renderer = new Renderer();
-        canvas.addGLEventListener(renderer);
+        canvas.addGLEventListener(new Renderer(canvas));
 
         frame.add(canvas);
         frame.setSize(1000, 800);
@@ -28,7 +25,6 @@ public class Window {
             public void windowClosing(WindowEvent e) {
                 frame.dispose();
                 System.exit(0);
-
             }
         });
     }
