@@ -30,6 +30,10 @@ public class Renderer implements GLEventListener, MouseListener {
     private int level2X, level2Y;
     private int level3X, level3Y;
 
+    // *** زر Back ***
+    private Texture btnBack;
+    private int backX, backY, backW, backH;
+
     private GLCanvas canvas;
 
     // *** كائنات الصوت ***
@@ -46,7 +50,6 @@ public class Renderer implements GLEventListener, MouseListener {
         gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glClearColor(0f, 0f, 0f, 1f);
 
-        // تحميل الأنسجة والأصوات
         try {
             // تحميل القائمة الرئيسية
             URL bgURL = getClass().getClassLoader().getResource("assets/back_1.png");
@@ -56,6 +59,7 @@ public class Renderer implements GLEventListener, MouseListener {
             URL levelBgURL = getClass().getClassLoader().getResource("assets/back2.png");
             if(levelBgURL != null) levelBackground = TextureIO.newTexture(levelBgURL, false, TextureIO.PNG);
 
+            // أزرار القائمة الرئيسية
             URL startURL = getClass().getClassLoader().getResource("assets/sst.png");
             if(startURL != null) btnStart = TextureIO.newTexture(startURL, false, TextureIO.PNG);
 
@@ -71,6 +75,10 @@ public class Renderer implements GLEventListener, MouseListener {
 
             URL l3URL = getClass().getClassLoader().getResource("assets/lvl3.png");
             if(l3URL != null) level3Tex = TextureIO.newTexture(l3URL, false, TextureIO.PNG);
+
+            // زر Back
+            URL backURL = getClass().getClassLoader().getResource("assets/bb.png");
+            if(backURL != null) btnBack = TextureIO.newTexture(backURL, false, TextureIO.PNG);
 
             // تحميل وتهيئة كائنات الصوت
             clickSound = new Sound("click.wav");
@@ -98,31 +106,28 @@ public class Renderer implements GLEventListener, MouseListener {
         exitY  = startY - exitH - spacing;
 
         // 2. تحديد مواقع اختيار المستويات (Level Selection Positioning)
-
-        // *** الأبعاد المُعدلة (350x130) لضمان منطقة نقر جيدة ***
         levelW = 350;
-        levelH = 130; // تم التعديل إلى 130
+        levelH = 130;
         int padding = 30;
 
-        int levelX = (canvasW - levelW) / 2; // التوسيط الأفقي
-
-        // التوسيط العمودي
+        int levelX = (canvasW - levelW) / 2;
         int totalHeight = (levelH * 3) + (padding * 2);
         int startYPos = (canvasH / 2) - (totalHeight / 2);
 
-        // حساب مواضع Y (الترتيب: المستوى 1 في الأعلى)
-
-        // المستوى 3 (الأسفل)
         level3X = levelX;
         level3Y = startYPos;
 
-        // المستوى 2 (الأوسط)
         level2X = levelX;
         level2Y = startYPos + levelH + padding;
 
-        // المستوى 1 (الأعلى)
         level1X = levelX;
         level1Y = startYPos + (levelH * 2) + (padding * 2);
+
+        // 3. تحديد موقع وحجم زر Back
+        backW = 150;
+        backH = 70;
+        backX = 20;
+        backY = canvasH - backH - 20;
     }
 
     public void display(GLAutoDrawable drawable) {
@@ -137,9 +142,7 @@ public class Renderer implements GLEventListener, MouseListener {
         gl.glMatrixMode(GL.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        // منطق اختيار الخلفية المناسبة
         Texture currentBackground = null;
-
         if (gameState == STATE_MENU) {
             currentBackground = background;
         } else if (gameState == STATE_LEVEL_SELECT) {
@@ -148,7 +151,6 @@ public class Renderer implements GLEventListener, MouseListener {
             currentBackground = background;
         }
 
-        // رسم الخلفية المختارة
         if(currentBackground != null){
             currentBackground.bind();
             gl.glBegin(GL.GL_QUADS);
@@ -159,7 +161,6 @@ public class Renderer implements GLEventListener, MouseListener {
             gl.glEnd();
         }
 
-        // رسم المحتوى بناءً على حالة اللعبة
         if (gameState == STATE_MENU) {
             drawMainMenu(gl);
         } else if (gameState == STATE_LEVEL_SELECT) {
@@ -168,7 +169,6 @@ public class Renderer implements GLEventListener, MouseListener {
     }
 
     private void drawMainMenu(GL gl) {
-        // رسم زر Start
         if(btnStart != null){
             btnStart.bind();
             gl.glBegin(GL.GL_QUADS);
@@ -179,7 +179,6 @@ public class Renderer implements GLEventListener, MouseListener {
             gl.glEnd();
         }
 
-        // رسم زر Exit
         if(btnExit != null){
             btnExit.bind();
             gl.glBegin(GL.GL_QUADS);
@@ -192,7 +191,6 @@ public class Renderer implements GLEventListener, MouseListener {
     }
 
     private void drawLevelSelection(GL gl) {
-        // رسم Level 1
         if(level1Tex != null){
             level1Tex.bind();
             gl.glBegin(GL.GL_QUADS);
@@ -203,7 +201,6 @@ public class Renderer implements GLEventListener, MouseListener {
             gl.glEnd();
         }
 
-        // رسم Level 2
         if(level2Tex != null){
             level2Tex.bind();
             gl.glBegin(GL.GL_QUADS);
@@ -214,7 +211,6 @@ public class Renderer implements GLEventListener, MouseListener {
             gl.glEnd();
         }
 
-        // رسم Level 3
         if(level3Tex != null){
             level3Tex.bind();
             gl.glBegin(GL.GL_QUADS);
@@ -224,8 +220,18 @@ public class Renderer implements GLEventListener, MouseListener {
             gl.glTexCoord2f(0,0); gl.glVertex2f(level3X,level3Y+levelH);
             gl.glEnd();
         }
-    }
 
+        // رسم زر Back
+        if(btnBack != null){
+            btnBack.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0,1); gl.glVertex2f(backX, backY);
+            gl.glTexCoord2f(1,1); gl.glVertex2f(backX + backW, backY);
+            gl.glTexCoord2f(1,0); gl.glVertex2f(backX + backW, backY + backH);
+            gl.glTexCoord2f(0,0); gl.glVertex2f(backX, backY + backH);
+            gl.glEnd();
+        }
+    }
 
     public void reshape(GLAutoDrawable d, int x, int y, int w, int h) {
         d.getGL().glViewport(0,0,w,h);
@@ -234,26 +240,17 @@ public class Renderer implements GLEventListener, MouseListener {
     public void dispose(GLAutoDrawable drawable) {}
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {}
 
-    // كشف ضغط الماوس (التحكم في منطق الانتقال بين الحالات)
     public void mouseClicked(MouseEvent e) {
-        // تحويل إحداثيات الماوس: (0,0) في الأسفل لـ OpenGL
         int my = canvas.getHeight() - e.getY();
         int mx = e.getX();
 
         if (gameState == STATE_MENU) {
-
-            // النقر على Start
             if(mx >= startX && mx <= startX + startW && my >= startY && my <= startY + startH){
                 if (clickSound != null) clickSound.play();
-
                 gameState = STATE_LEVEL_SELECT;
                 System.out.println("Transition to Level Selection");
-
                 canvas.repaint();
-
             }
-
-            // النقر على Exit
             else if(mx >= exitX && mx <= exitX + exitW && my >= exitY && my <= exitY + exitH){
                 if (clickSound != null) clickSound.play();
                 if (gameMusic != null) gameMusic.stop();
@@ -262,31 +259,31 @@ public class Renderer implements GLEventListener, MouseListener {
                 System.exit(0);
             }
         }
-
         else if (gameState == STATE_LEVEL_SELECT) {
 
-            // Level 1
+            // Back button
+            if(mx >= backX && mx <= backX + backW && my >= backY && my <= backY + backH){
+                if(clickSound != null) clickSound.play();
+                gameState = STATE_MENU;
+                System.out.println("Back to Menu");
+                canvas.repaint();
+                return;
+            }
+
             if(mx >= level1X && mx <= level1X + levelW && my >= level1Y && my <= level1Y + levelH){
                 if (clickSound != null) clickSound.play();
                 gameState = STATE_GAME_PLAY;
                 System.out.println("Starting Level 1!");
-                // **هنا ستضعي كود بدء اللعب للمستوى 1**
             }
-
-            // Level 2
             else if(mx >= level2X && mx <= level2X + levelW && my >= level2Y && my <= level2Y + levelH){
                 if (clickSound != null) clickSound.play();
                 gameState = STATE_GAME_PLAY;
                 System.out.println("Starting Level 2!");
-                // **هنا ستضعي كود بدء اللعب للمستوى 2**
             }
-
-            // Level 3
             else if(mx >= level3X && mx <= level3X + levelW && my >= level3Y && my <= level3Y + levelH){
                 if (clickSound != null) clickSound.play();
                 gameState = STATE_GAME_PLAY;
                 System.out.println("Starting Level 3!");
-                // **هنا ستضعي كود بدء اللعب للمستوى 3**
             }
         }
     }
