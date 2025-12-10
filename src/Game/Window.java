@@ -9,7 +9,7 @@ import javax.media.opengl.GLCanvas;
 public class Window {
 
     public Window() {
-        Frame frame = new Frame("Chicken Game Menu");
+        Frame frame = new Frame("Chicken pop");
 
         GLCapabilities caps = new GLCapabilities();
         GLCanvas canvas = new GLCanvas(caps);
