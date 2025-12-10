@@ -18,6 +18,10 @@ public class Renderer implements GLEventListener, MouseListener {
 
     private GLCanvas canvas;
 
+    // *** 1. تعريف كائنات الصوت المضافة ***
+    private Sound clickSound;
+    private Sound gameMusic;
+
     public Renderer(GLCanvas canvas) {
         this.canvas = canvas;
         canvas.addMouseListener(this);
@@ -28,6 +32,7 @@ public class Renderer implements GLEventListener, MouseListener {
         gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glClearColor(0f, 0f, 0f, 1f);
 
+        // تحميل الأنسجة
         try {
             URL bgURL = getClass().getClassLoader().getResource("assets/back_1.png");
             if(bgURL != null) background = TextureIO.newTexture(bgURL, false, TextureIO.PNG);
@@ -37,8 +42,18 @@ public class Renderer implements GLEventListener, MouseListener {
 
             URL exitURL = getClass().getClassLoader().getResource("assets/eex.png");
             if(exitURL != null) btnExit = TextureIO.newTexture(exitURL, false, TextureIO.PNG);
+
+            // *** 2. تحميل وتهيئة كائنات الصوت ***
+            clickSound = new Sound("click.wav");
+            gameMusic = new Sound("game sound.wav");
+
+            // تشغيل موسيقى الخلفية بمجرد تهيئة القائمة
+            if(gameMusic != null) {
+                gameMusic.loop();
+            }
+
         } catch(Exception e){
-            System.out.println("Failed to load images: " + e.getMessage());
+            System.out.println("Failed to load resources: " + e.getMessage());
         }
 
         // أبعاد الزرار
@@ -58,7 +73,6 @@ public class Renderer implements GLEventListener, MouseListener {
 
         startY = (canvasH / 2) - (startH / 2) - 50;
         exitY  = startY - exitH - spacing;    // Exit تحت Start بمسافة 20px
-
     }
 
     public void display(GLAutoDrawable drawable) {
@@ -119,12 +133,35 @@ public class Renderer implements GLEventListener, MouseListener {
         int my = canvas.getHeight() - e.getY(); // flip Y
         int mx = e.getX();
 
+        // منطق النقر على زر Start
         if(mx >= startX && mx <= startX + startW && my >= startY && my <= startY + startH){
+
+            // 1. تشغيل صوت النقر
+            if (clickSound != null) clickSound.play();
+
+            // 2. إيقاف موسيقى القائمة الرئيسية
+            if (gameMusic != null) gameMusic.stop();
+
             System.out.println("Start clicked!");
+
+            // *** هنا يجب أن تضعي الكود للانتقال إلى شاشة اللعب ***
+            // (مثلاً: إغلاق النافذة الحالية وفتح نافذة اللعبة أو تغيير الـ Renderer)
         }
 
+        // منطق النقر على زر Exit
         if(mx >= exitX && mx <= exitX + exitW && my >= exitY && my <= exitY + exitH){
+
+            // 1. تشغيل صوت النقر
+            if (clickSound != null) clickSound.play();
+
+            // 2. إيقاف الموسيقى
+            if (gameMusic != null) gameMusic.stop();
+
             System.out.println("Exit clicked!");
+
+            // تأخير بسيط لضمان تشغيل صوت النقر قبل الإغلاق
+            try { Thread.sleep(100); } catch (InterruptedException ex) {}
+
             System.exit(0);
         }
     }
