@@ -7,30 +7,36 @@ import java.io.File;
 import java.io.IOException;
 import texture.constants;
 
-public class SpaceShip {
+public class Bullet {
     private float x, y;
     private int width, height;
+    private float speed;
     private Texture texture;
-    private String imagePath;
+    private boolean active;
 
-    public SpaceShip(String imagePath) {
-        this.width = constants.PLAYER_WIDTH;
-        this.height = constants.PLAYER_HEIGHT;
-        this.x = constants.WINDOW_WIDTH / 2 - width / 2;
-        this.y = 50;
-        this.imagePath = imagePath;
-    }
+    public Bullet(String imagePath, float startX, float startY, int width, int height) {
+        this.width = width;
+        this.height = height;
+        this.speed = 10;
+        this.x = startX;
+        this.y = startY;
+        this.active = true;
 
-    public void init(GL gl) {
         try {
             texture = TextureIO.newTexture(new File(imagePath), true);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    public void update() {
+        if (!active) return;
+        y += speed;
+        if (y > constants.WINDOW_HEIGHT)
+            active = false;
+    }
 
     public void draw(GL gl) {
-        if (texture == null) return;
+        if (!active || texture == null) return;
 
         gl.glEnable(GL.GL_BLEND);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -52,39 +58,7 @@ public class SpaceShip {
         texture.disable();
         gl.glDisable(GL.GL_BLEND);
     }
-
-    public void moveLeft() {
-        x -= constants.PLAYER_SPEED;
-        if(x < 0)
-            x = 0;
-    }
-    public void moveRight() {
-        x += constants.PLAYER_SPEED;
-        if(x + width > constants.WINDOW_WIDTH)
-            x = constants.WINDOW_WIDTH - width;
-    }
-    public void moveUp() {
-        y += constants.PLAYER_SPEED;
-        if(y + height > constants.WINDOW_HEIGHT)
-            y = constants.WINDOW_HEIGHT - height;
-    }
-    public void moveDown() {
-        y -= constants.PLAYER_SPEED;
-        if(y < 0)
-            y = 0;
-    }
-
-
-    public float getX() {
-        return x;
-    }
-    public float getY() {
-        return y;
-    }
-    public int getWidth() {
-        return width;
-    }
-    public int getHeight() {
-        return height;
+    public boolean isActive() {
+        return active;
     }
 }

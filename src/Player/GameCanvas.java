@@ -3,15 +3,20 @@ package Player;
 import javax.media.opengl.*;
 import com.sun.opengl.util.FPSAnimator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameCanvas implements GLEventListener {
 
     private SpaceShip ship;
     private Controls controls;
     private FPSAnimator animator;
+    private ArrayList<Bullet> bullets;
 
     public GameCanvas(SpaceShip ship, Controls controls) {
         this.ship = ship;
         this.controls = controls;
+        bullets = new ArrayList<>();
     }
 
     @Override
@@ -28,7 +33,17 @@ public class GameCanvas implements GLEventListener {
         GL gl = drawable.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         controls.handleKeyPress(ship);
+        List<Bullet> bullets = controls.bullets;
+        for (Bullet b : bullets) {
+            if (b.isActive()) {
+                b.update();
+                b.draw(gl);
+            }
+        }
+        bullets.removeIf(b -> !b.isActive());
+
         ship.draw(gl);
+
     }
 
     @Override
