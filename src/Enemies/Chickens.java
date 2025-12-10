@@ -5,5 +5,6 @@ public class Chickens {
         this.x=x;
         this.y=y;
 
+
     }
 }
