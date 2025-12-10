@@ -7,14 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="gluegen-rt1" level="application" />
-    <orderEntry type="library" exported="" name="jogl1" level="application" />
-    <orderEntry type="library" exported="" name="gluegen-rt2" level="application" />
-    <orderEntry type="library" exported="" name="lib72" level="application" />
-    <orderEntry type="library" exported="" name="lib71" level="application" />
-    <orderEntry type="library" exported="" name="lib73" level="application" />
-    <orderEntry type="library" exported="" name="lib74" level="application" />
-    <orderEntry type="library" exported="" name="lib75" level="application" />
-    <orderEntry type="library" exported="" name="lib76" level="application" />
+    <orderEntry type="library" name="gluegen-rt1" level="application" />
+    <orderEntry type="library" name="jogl1" level="application" />
+    <orderEntry type="library" name="gluegen-rt2" level="application" />
   </component>
 </module>
