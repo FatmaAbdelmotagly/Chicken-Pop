@@ -23,6 +23,10 @@ public class ChickenManager implements GLEventListener {
 
 
 
+    public List<Chickens> getChickens(){
+        return chickensGroup;
+    }
+
     public void level(int level){
         if(level==1){
             chickensGroup=Chicken_groub(3,3,-7,0,5,2);
@@ -75,7 +79,7 @@ public class ChickenManager implements GLEventListener {
     @Override
     public void init(GLAutoDrawable gld) {
         GL gl = gld.getGL();
-        gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
