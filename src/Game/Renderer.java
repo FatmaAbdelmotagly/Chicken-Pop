@@ -10,15 +10,29 @@ import javax.media.opengl.GLCanvas;
 
 public class Renderer implements GLEventListener, MouseListener {
 
-    private Texture background;
-    private Texture btnStart, btnExit;
+    // *** حالات اللعبة (Game States) ***
+    private final int STATE_MENU = 0;
+    private final int STATE_LEVEL_SELECT = 1;
+    private final int STATE_GAME_PLAY = 2;
 
+    private int gameState = STATE_MENU;
+
+    // *** الأنسجة والمتغيرات الخاصة بالقائمة الرئيسية ***
+    private Texture background;
+    private Texture levelBackground;
+    private Texture btnStart, btnExit;
     private int startX, startY, startW, startH;
     private int exitX, exitY, exitW, exitH;
 
+    // *** الأنسجة والمتغيرات الخاصة باختيار المستويات ***
+    private Texture level1Tex, level2Tex, level3Tex;
+    private int level1X, level1Y, levelW, levelH;
+    private int level2X, level2Y;
+    private int level3X, level3Y;
+
     private GLCanvas canvas;
 
-    // *** 1. تعريف كائنات الصوت المضافة ***
+    // *** كائنات الصوت ***
     private Sound clickSound;
     private Sound gameMusic;
 
@@ -32,10 +46,15 @@ public class Renderer implements GLEventListener, MouseListener {
         gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glClearColor(0f, 0f, 0f, 1f);
 
-        // تحميل الأنسجة
+        // تحميل الأنسجة والأصوات
         try {
+            // تحميل القائمة الرئيسية
             URL bgURL = getClass().getClassLoader().getResource("assets/back_1.png");
             if(bgURL != null) background = TextureIO.newTexture(bgURL, false, TextureIO.PNG);
+
+            // تحميل الخلفية الجديدة
+            URL levelBgURL = getClass().getClassLoader().getResource("assets/back2.png");
+            if(levelBgURL != null) levelBackground = TextureIO.newTexture(levelBgURL, false, TextureIO.PNG);
 
             URL startURL = getClass().getClassLoader().getResource("assets/sst.png");
             if(startURL != null) btnStart = TextureIO.newTexture(startURL, false, TextureIO.PNG);
@@ -43,36 +62,67 @@ public class Renderer implements GLEventListener, MouseListener {
             URL exitURL = getClass().getClassLoader().getResource("assets/eex.png");
             if(exitURL != null) btnExit = TextureIO.newTexture(exitURL, false, TextureIO.PNG);
 
-            // *** 2. تحميل وتهيئة كائنات الصوت ***
+            // تحميل صور المستويات
+            URL l1URL = getClass().getClassLoader().getResource("assets/lvl1.png");
+            if(l1URL != null) level1Tex = TextureIO.newTexture(l1URL, false, TextureIO.PNG);
+
+            URL l2URL = getClass().getClassLoader().getResource("assets/lvl2.png");
+            if(l2URL != null) level2Tex = TextureIO.newTexture(l2URL, false, TextureIO.PNG);
+
+            URL l3URL = getClass().getClassLoader().getResource("assets/lvl3.png");
+            if(l3URL != null) level3Tex = TextureIO.newTexture(l3URL, false, TextureIO.PNG);
+
+            // تحميل وتهيئة كائنات الصوت
             clickSound = new Sound("click.wav");
             gameMusic = new Sound("game sound.wav");
 
-            // تشغيل موسيقى الخلفية بمجرد تهيئة القائمة
             if(gameMusic != null) {
                 gameMusic.loop();
             }
 
         } catch(Exception e){
-            System.out.println("Failed to load resources: " + e.getMessage());
+            System.err.println("Failed to load resources: " + e.getMessage());
         }
-
-        // أبعاد الزرار
-        startW = 300; startH = 150;
-        exitW  = 300; exitH  = 150;
 
         int canvasW = drawable.getWidth();
         int canvasH = drawable.getHeight();
 
+        // 1. تحديد مواقع القائمة الرئيسية (Menu Positioning)
+        startW = 300; startH = 150;
+        exitW  = 300; exitH  = 150;
+        int spacing = 30;
 
-        int spacing = 20; // المسافة بين Start و Exit
-
-        // متمركزين أفقيًا
         startX = (canvasW - startW) / 2;
         exitX  = (canvasW - exitW) / 2;
-
-
         startY = (canvasH / 2) - (startH / 2) - 50;
-        exitY  = startY - exitH - spacing;    // Exit تحت Start بمسافة 20px
+        exitY  = startY - exitH - spacing;
+
+        // 2. تحديد مواقع اختيار المستويات (Level Selection Positioning)
+
+        // *** الأبعاد المُعدلة (350x130) لضمان منطقة نقر جيدة ***
+        levelW = 350;
+        levelH = 130; // تم التعديل إلى 130
+        int padding = 30;
+
+        int levelX = (canvasW - levelW) / 2; // التوسيط الأفقي
+
+        // التوسيط العمودي
+        int totalHeight = (levelH * 3) + (padding * 2);
+        int startYPos = (canvasH / 2) - (totalHeight / 2);
+
+        // حساب مواضع Y (الترتيب: المستوى 1 في الأعلى)
+
+        // المستوى 3 (الأسفل)
+        level3X = levelX;
+        level3Y = startYPos;
+
+        // المستوى 2 (الأوسط)
+        level2X = levelX;
+        level2Y = startYPos + levelH + padding;
+
+        // المستوى 1 (الأعلى)
+        level1X = levelX;
+        level1Y = startYPos + (levelH * 2) + (padding * 2);
     }
 
     public void display(GLAutoDrawable drawable) {
@@ -87,9 +137,20 @@ public class Renderer implements GLEventListener, MouseListener {
         gl.glMatrixMode(GL.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        // رسم الخلفية
-        if(background != null){
-            background.bind();
+        // منطق اختيار الخلفية المناسبة
+        Texture currentBackground = null;
+
+        if (gameState == STATE_MENU) {
+            currentBackground = background;
+        } else if (gameState == STATE_LEVEL_SELECT) {
+            currentBackground = levelBackground;
+        } else {
+            currentBackground = background;
+        }
+
+        // رسم الخلفية المختارة
+        if(currentBackground != null){
+            currentBackground.bind();
             gl.glBegin(GL.GL_QUADS);
             gl.glTexCoord2f(0,1); gl.glVertex2f(0,0);
             gl.glTexCoord2f(1,1); gl.glVertex2f(w,0);
@@ -98,6 +159,15 @@ public class Renderer implements GLEventListener, MouseListener {
             gl.glEnd();
         }
 
+        // رسم المحتوى بناءً على حالة اللعبة
+        if (gameState == STATE_MENU) {
+            drawMainMenu(gl);
+        } else if (gameState == STATE_LEVEL_SELECT) {
+            drawLevelSelection(gl);
+        }
+    }
+
+    private void drawMainMenu(GL gl) {
         // رسم زر Start
         if(btnStart != null){
             btnStart.bind();
@@ -121,6 +191,42 @@ public class Renderer implements GLEventListener, MouseListener {
         }
     }
 
+    private void drawLevelSelection(GL gl) {
+        // رسم Level 1
+        if(level1Tex != null){
+            level1Tex.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0,1); gl.glVertex2f(level1X,level1Y);
+            gl.glTexCoord2f(1,1); gl.glVertex2f(level1X+levelW,level1Y);
+            gl.glTexCoord2f(1,0); gl.glVertex2f(level1X+levelW,level1Y+levelH);
+            gl.glTexCoord2f(0,0); gl.glVertex2f(level1X,level1Y+levelH);
+            gl.glEnd();
+        }
+
+        // رسم Level 2
+        if(level2Tex != null){
+            level2Tex.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0,1); gl.glVertex2f(level2X,level2Y);
+            gl.glTexCoord2f(1,1); gl.glVertex2f(level2X+levelW,level2Y);
+            gl.glTexCoord2f(1,0); gl.glVertex2f(level2X+levelW,level2Y+levelH);
+            gl.glTexCoord2f(0,0); gl.glVertex2f(level2X,level2Y+levelH);
+            gl.glEnd();
+        }
+
+        // رسم Level 3
+        if(level3Tex != null){
+            level3Tex.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0,1); gl.glVertex2f(level3X,level3Y);
+            gl.glTexCoord2f(1,1); gl.glVertex2f(level3X+levelW,level3Y);
+            gl.glTexCoord2f(1,0); gl.glVertex2f(level3X+levelW,level3Y+levelH);
+            gl.glTexCoord2f(0,0); gl.glVertex2f(level3X,level3Y+levelH);
+            gl.glEnd();
+        }
+    }
+
+
     public void reshape(GLAutoDrawable d, int x, int y, int w, int h) {
         d.getGL().glViewport(0,0,w,h);
     }
@@ -128,41 +234,60 @@ public class Renderer implements GLEventListener, MouseListener {
     public void dispose(GLAutoDrawable drawable) {}
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {}
 
-    // كشف ضغط الماوس
+    // كشف ضغط الماوس (التحكم في منطق الانتقال بين الحالات)
     public void mouseClicked(MouseEvent e) {
-        int my = canvas.getHeight() - e.getY(); // flip Y
+        // تحويل إحداثيات الماوس: (0,0) في الأسفل لـ OpenGL
+        int my = canvas.getHeight() - e.getY();
         int mx = e.getX();
 
-        // منطق النقر على زر Start
-        if(mx >= startX && mx <= startX + startW && my >= startY && my <= startY + startH){
+        if (gameState == STATE_MENU) {
 
-            // 1. تشغيل صوت النقر
-            if (clickSound != null) clickSound.play();
+            // النقر على Start
+            if(mx >= startX && mx <= startX + startW && my >= startY && my <= startY + startH){
+                if (clickSound != null) clickSound.play();
 
-            // 2. إيقاف موسيقى القائمة الرئيسية
-            if (gameMusic != null) gameMusic.stop();
+                gameState = STATE_LEVEL_SELECT;
+                System.out.println("Transition to Level Selection");
 
-            System.out.println("Start clicked!");
+                canvas.repaint();
 
-            // *** هنا يجب أن تضعي الكود للانتقال إلى شاشة اللعب ***
-            // (مثلاً: إغلاق النافذة الحالية وفتح نافذة اللعبة أو تغيير الـ Renderer)
+            }
+
+            // النقر على Exit
+            else if(mx >= exitX && mx <= exitX + exitW && my >= exitY && my <= exitY + exitH){
+                if (clickSound != null) clickSound.play();
+                if (gameMusic != null) gameMusic.stop();
+                System.out.println("Exit clicked!");
+                try { Thread.sleep(100); } catch (InterruptedException ex) {}
+                System.exit(0);
+            }
         }
 
-        // منطق النقر على زر Exit
-        if(mx >= exitX && mx <= exitX + exitW && my >= exitY && my <= exitY + exitH){
+        else if (gameState == STATE_LEVEL_SELECT) {
 
-            // 1. تشغيل صوت النقر
-            if (clickSound != null) clickSound.play();
+            // Level 1
+            if(mx >= level1X && mx <= level1X + levelW && my >= level1Y && my <= level1Y + levelH){
+                if (clickSound != null) clickSound.play();
+                gameState = STATE_GAME_PLAY;
+                System.out.println("Starting Level 1!");
+                // **هنا ستضعي كود بدء اللعب للمستوى 1**
+            }
 
-            // 2. إيقاف الموسيقى
-            if (gameMusic != null) gameMusic.stop();
+            // Level 2
+            else if(mx >= level2X && mx <= level2X + levelW && my >= level2Y && my <= level2Y + levelH){
+                if (clickSound != null) clickSound.play();
+                gameState = STATE_GAME_PLAY;
+                System.out.println("Starting Level 2!");
+                // **هنا ستضعي كود بدء اللعب للمستوى 2**
+            }
 
-            System.out.println("Exit clicked!");
-
-            // تأخير بسيط لضمان تشغيل صوت النقر قبل الإغلاق
-            try { Thread.sleep(100); } catch (InterruptedException ex) {}
-
-            System.exit(0);
+            // Level 3
+            else if(mx >= level3X && mx <= level3X + levelW && my >= level3Y && my <= level3Y + levelH){
+                if (clickSound != null) clickSound.play();
+                gameState = STATE_GAME_PLAY;
+                System.out.println("Starting Level 3!");
+                // **هنا ستضعي كود بدء اللعب للمستوى 3**
+            }
         }
     }
 
