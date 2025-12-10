@@ -7,6 +7,7 @@ import java.net.URL;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.media.opengl.GLCanvas;
+import java.io.IOException;
 
 public class Renderer implements GLEventListener, MouseListener {
 
@@ -14,8 +15,11 @@ public class Renderer implements GLEventListener, MouseListener {
     private final int STATE_MENU = 0;
     private final int STATE_LEVEL_SELECT = 1;
     private final int STATE_GAME_PLAY = 2;
+    private final int STATE_PAUSE = 3;     // حالة الإيقاف المؤقت
+    private final int STATE_GAME_OVER = 4; // حالة نهاية اللعبة
 
     private int gameState = STATE_MENU;
+    private int currentLevel = 0; // 1, 2, or 3
 
     // Textures الرئيسية
     private Texture background;
@@ -37,6 +41,22 @@ public class Renderer implements GLEventListener, MouseListener {
     private Texture level1BgTex, level2BgTex, level3BgTex;
     private Texture currentBgTex;
 
+    // HUD & Pause Menu & Game Over Textures
+    private Texture btnPause;
+    private int pauseX, pauseY, pauseW, pauseH;
+
+    private Texture btnResume;
+    private int resumeW, resumeH, resumeX, resumeY;
+
+    private Texture lifeHeartTex;
+    private int currentScore = 0;
+    private int currentLives = 3;
+
+    private Texture gameOverScreenTex;
+    private Texture btnRetry;
+    private int gameOverW, gameOverH, gameOverX, gameOverY;
+    private int retryW, retryH, retryX, retryY;
+
     private GLCanvas canvas;
 
     // Sounds
@@ -51,10 +71,14 @@ public class Renderer implements GLEventListener, MouseListener {
     public void init(GLAutoDrawable drawable){
         GL gl = drawable.getGL();
         gl.glEnable(GL.GL_TEXTURE_2D);
+        // تمكين الشفافية (مهم لقوائم التوقف/القلوب الشفافة)
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+
         gl.glClearColor(0f,0f,0f,1f);
 
         try {
-            // القائمة الرئيسية
+            // القائمة الرئيسية والمستويات
             URL bgURL = getClass().getClassLoader().getResource("assets/back_1.png");
             if(bgURL != null) background = TextureIO.newTexture(bgURL,false,TextureIO.PNG);
 
@@ -67,7 +91,6 @@ public class Renderer implements GLEventListener, MouseListener {
             URL exitURL = getClass().getClassLoader().getResource("assets/eex.png");
             if(exitURL != null) btnExit = TextureIO.newTexture(exitURL,false,TextureIO.PNG);
 
-            // Levels
             URL l1URL = getClass().getClassLoader().getResource("assets/lvl1.png");
             if(l1URL != null) level1Tex = TextureIO.newTexture(l1URL,false,TextureIO.PNG);
 
@@ -78,26 +101,40 @@ public class Renderer implements GLEventListener, MouseListener {
             if(l3URL != null) level3Tex = TextureIO.newTexture(l3URL,false,TextureIO.PNG);
 
             // Back Button
-            // تم تغيير اسم الملف إلى "bbb.jpg" أو "bb.png" بناءً على آخر كود أرسلتيه
             URL backURL = getClass().getClassLoader().getResource("assets/bb.png");
             if(backURL != null) btnBack = TextureIO.newTexture(backURL,false,TextureIO.PNG);
 
-            // Level Backgrounds (مفترض أنك ستغيرين هذه الصور لاحقاً)
+            // Level Backgrounds
             URL l1BgURL = getClass().getClassLoader().getResource("assets/back2.png");
             if(l1BgURL != null) level1BgTex = TextureIO.newTexture(l1BgURL,false,TextureIO.PNG);
-
             URL l2BgURL = getClass().getClassLoader().getResource("assets/back2.png");
             if(l2BgURL != null) level2BgTex = TextureIO.newTexture(l2BgURL,false,TextureIO.PNG);
-
             URL l3BgURL = getClass().getClassLoader().getResource("assets/back2.png");
             if(l3BgURL != null) level3BgTex = TextureIO.newTexture(l3BgURL,false,TextureIO.PNG);
+
+            // HUD & Menu Textures (يجب توفير هذه الصور في مجلد assets)
+            URL pauseURL = getClass().getClassLoader().getResource("assets/pause.png");
+            if(pauseURL != null) btnPause = TextureIO.newTexture(pauseURL,false,TextureIO.PNG);
+
+            URL heartURL = getClass().getClassLoader().getResource("assets/heart.png");
+            if(heartURL != null) lifeHeartTex = TextureIO.newTexture(heartURL,false,TextureIO.PNG);
+
+            URL resumeURL = getClass().getClassLoader().getResource("assets/resume.png");
+            if(resumeURL != null) btnResume = TextureIO.newTexture(resumeURL,false,TextureIO.PNG);
+
+            URL gameOverURL = getClass().getClassLoader().getResource("assets/gameover.png");
+            if(gameOverURL != null) gameOverScreenTex = TextureIO.newTexture(gameOverURL,false,TextureIO.PNG);
+
+            URL retryURL = getClass().getClassLoader().getResource("assets/retry.png");
+            if(retryURL != null) btnRetry = TextureIO.newTexture(retryURL,false,TextureIO.PNG);
+
 
             // Sounds
             clickSound = new Sound("click.wav");
             gameMusic = new Sound("game sound.wav");
             if(gameMusic != null) gameMusic.loop();
 
-        } catch(Exception e){
+        } catch(IOException e){
             System.err.println("Failed to load resources: " + e.getMessage());
         }
 
@@ -126,12 +163,31 @@ public class Renderer implements GLEventListener, MouseListener {
         level1X = levelX; level1Y = startYPos + (levelH*2) + (padding*2);
 
         // Back Button
-        // تم ضبط هذه القيم لتكون أعلى في الشاشة
         backW = 150; backH = 70;
-        backX = 20; backY = canvasH - backH - 20; // هذا يضع الزر في الزاوية العلوية اليسرى
+        backX = 20; backY = canvasH - backH - 20;
+
+        // Pause Button (أعلى اليمين)
+        pauseW = 150; pauseH =70;
+        pauseX = canvasW - pauseW - 20;
+        pauseY = canvasH - pauseH - 20;
+
+        // Resume Button (منتصف الشاشة)
+        resumeW = 200; resumeH = 80;
+        resumeX = (canvasW - resumeW) / 2;
+        resumeY = (canvasH / 2) - 50;
+
+        // Game Over Screen
+        gameOverW = 600; gameOverH = 400;
+        gameOverX = (canvasW - gameOverW) / 2;
+        gameOverY = (canvasH - gameOverH) / 2;
+
+        // Retry Button
+        retryW = 200; retryH = 80;
+        retryX = (canvasW - retryW) / 2;
+        retryY = gameOverY + 50;
     }
 
-    // *** دالة جديدة لرسم زر العودة ***
+    // دالة مساعدة لرسم زر العودة
     private void drawBackButton(GL gl) {
         if(btnBack != null){
             btnBack.bind();
@@ -144,6 +200,126 @@ public class Renderer implements GLEventListener, MouseListener {
         }
     }
 
+    // دالة مساعدة لعرض النص (يجب استبدالها بـ TextRenderer إذا أمكن)
+    private void drawTextPlaceholder(GL gl, String text, int x, int y) {
+        // نستخدم مربع ملون كـ Placeholder
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glColor3f(1.0f, 1.0f, 0.0f); // لون أصفر للنقاط
+        gl.glBegin(GL.GL_QUADS);
+        gl.glVertex2f(x, y);
+        gl.glVertex2f(x + 150, y);
+        gl.glVertex2f(x + 150, y + 25);
+        gl.glVertex2f(x, y + 25);
+        gl.glEnd();
+        gl.glColor3f(1.0f, 1.0f, 1.0f); // إعادة اللون للأبيض
+        gl.glEnable(GL.GL_TEXTURE_2D);
+    }
+
+    // دالة رسم الـ HUD (النقاط والأرواح وزر الإيقاف المؤقت)
+    private void drawHUD(GL gl, int w, int h) {
+        // 1. زر الإيقاف المؤقت (Pause Button)
+        if (btnPause != null) {
+            // ... (كود زر الإيقاف المؤقت) ...
+            btnPause.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0, 1); gl.glVertex2f(pauseX, pauseY);
+            gl.glTexCoord2f(1, 1); gl.glVertex2f(pauseX + pauseW, pauseY);
+            gl.glTexCoord2f(1, 0); gl.glVertex2f(pauseX + pauseW, pauseY + pauseH);
+            gl.glTexCoord2f(0, 0); gl.glVertex2f(pauseX, pauseY + pauseH);
+            gl.glEnd();
+        }
+
+        // 3. Score (النقاط) - نضعه أولاً لتحديد موقع القلوب بعده
+        // الـ Placeholder عرضه 150 + 20 (مسافة البداية) = 170
+        int scorePlaceholderW = 150;
+        int scorePlaceholderX = 20;
+        int scorePlaceholderY = h - 50;
+
+        drawTextPlaceholder(gl, "Score: " + currentScore, scorePlaceholderX, scorePlaceholderY);
+
+
+        // 2. الأرواح (Lives) - رسم القلوب
+        if (lifeHeartTex != null) {
+
+            int heartSizeW =120;  // العرض
+            int heartSizeH = 55;  // الارتفاع
+
+// المسافة بين القلوب (قريبة جدًا بدون تراكب)
+            int heartSpacing = -10;
+
+// موقع البداية للقلب الأول (بعد مربع النقاط)
+            int heartXStart = scorePlaceholderX + scorePlaceholderW + 15;
+            int heartY = h - heartSizeH - 10;
+
+            for (int i = 0; i < currentLives; i++) {
+                int heartX = heartXStart + i * (heartSizeW + heartSpacing);
+
+                lifeHeartTex.bind();
+                gl.glBegin(GL.GL_QUADS);
+                gl.glTexCoord2f(0, 1); gl.glVertex2f(heartX, heartY);
+                gl.glTexCoord2f(1, 1); gl.glVertex2f(heartX + heartSizeW, heartY);
+                gl.glTexCoord2f(1, 0); gl.glVertex2f(heartX + heartSizeW, heartY + heartSizeH);
+                gl.glTexCoord2f(0, 0); gl.glVertex2f(heartX, heartY + heartSizeH);
+                gl.glEnd();
+            }
+        }
+    }
+
+
+    // دالة رسم قائمة الإيقاف المؤقت
+    private void drawPauseMenu(GL gl, int w, int h) {
+        // خلفية سوداء شفافة لتعتيم اللعبة
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
+        gl.glBegin(GL.GL_QUADS);
+        gl.glVertex2f(0, 0);
+        gl.glVertex2f(w, 0);
+        gl.glVertex2f(w, h);
+        gl.glVertex2f(0, h);
+        gl.glEnd();
+        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        gl.glEnable(GL.GL_TEXTURE_2D);
+
+        // زر Resume
+        if (btnResume != null) {
+            btnResume.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0, 1); gl.glVertex2f(resumeX, resumeY);
+            gl.glTexCoord2f(1, 1); gl.glVertex2f(resumeX + resumeW, resumeY);
+            gl.glTexCoord2f(1, 0); gl.glVertex2f(resumeX + resumeW, resumeY + resumeH);
+            gl.glTexCoord2f(0, 0); gl.glVertex2f(resumeX, resumeY + resumeH);
+            gl.glEnd();
+        }
+        // يمكن إضافة زر "الخروج للقائمة" هنا
+    }
+
+    // دالة رسم شاشة نهاية اللعبة
+    private void drawGameOverScreen(GL gl, int w, int h) {
+        // شاشة Game Over
+        if (gameOverScreenTex != null) {
+            gameOverScreenTex.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0, 1); gl.glVertex2f(gameOverX, gameOverY);
+            gl.glTexCoord2f(1, 1); gl.glVertex2f(gameOverX + gameOverW, gameOverY);
+            gl.glTexCoord2f(1, 0); gl.glVertex2f(gameOverX + gameOverW, gameOverY + gameOverH);
+            gl.glTexCoord2f(0, 0); gl.glVertex2f(gameOverX, gameOverY + gameOverH);
+            gl.glEnd();
+        }
+
+        // زر Retry
+        if (btnRetry != null) {
+            btnRetry.bind();
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0, 1); gl.glVertex2f(retryX, retryY);
+            gl.glTexCoord2f(1, 1); gl.glVertex2f(retryX + retryW, retryY);
+            gl.glTexCoord2f(1, 0); gl.glVertex2f(retryX + retryW, retryY + retryH);
+            gl.glTexCoord2f(0, 0); gl.glVertex2f(retryX, retryY + retryH);
+            gl.glEnd();
+        }
+
+        // عرض Final Score
+        drawTextPlaceholder(gl, "Final Score: " + currentScore, retryX, retryY + 100);
+    }
 
     public void display(GLAutoDrawable drawable){
         GL gl = drawable.getGL();
@@ -161,7 +337,8 @@ public class Renderer implements GLEventListener, MouseListener {
 
         if(gameState == STATE_MENU) currentBackground = background;
         else if(gameState == STATE_LEVEL_SELECT) currentBackground = levelBackground;
-        else if(gameState == STATE_GAME_PLAY) currentBackground = currentBgTex;
+            // الخلفية تبقى ثابتة في حالات اللعب/التوقف/نهاية اللعبة
+        else if(gameState == STATE_GAME_PLAY || gameState == STATE_PAUSE || gameState == STATE_GAME_OVER) currentBackground = currentBgTex;
 
         if(currentBackground != null){
             currentBackground.bind();
@@ -175,10 +352,18 @@ public class Renderer implements GLEventListener, MouseListener {
 
         if(gameState == STATE_MENU) drawMainMenu(gl);
         else if(gameState == STATE_LEVEL_SELECT) drawLevelSelection(gl);
-            // *** رسم زر العودة في شاشة اللعب ***
         else if(gameState == STATE_GAME_PLAY) {
-            // لا نرسم أي شيء هنا غير الخلفية (وهي مرسومة بالفعل)
-            drawBackButton(gl); // رسم زر العودة فقط
+            // رسم عناصر اللعب الأساسية هنا
+            drawHUD(gl, w, h);
+        }
+        else if(gameState == STATE_PAUSE) {
+            // رسم عناصر اللعب، ثم HUD، ثم قائمة الإيقاف فوق الكل
+            // هنا لا نرسم عناصر اللعب الأساسية، فقط الخلفية والـ HUD
+            drawHUD(gl, w, h);
+            drawPauseMenu(gl, w, h);
+        }
+        else if(gameState == STATE_GAME_OVER) {
+            drawGameOverScreen(gl, w, h);
         }
     }
 
@@ -232,7 +417,6 @@ public class Renderer implements GLEventListener, MouseListener {
             gl.glEnd();
         }
 
-        // *** رسم زر العودة في شاشة اختيار المستويات ***
         drawBackButton(gl);
     }
 
@@ -265,29 +449,61 @@ public class Renderer implements GLEventListener, MouseListener {
                 return;
             }
 
-            // Levels
+            // Levels Selection
             if(mx >= level1X && mx <= level1X+levelW && my >= level1Y && my <= level1Y+levelH){
                 if(clickSound != null) clickSound.play();
                 currentBgTex = level1BgTex;
+                currentLevel = 1; // تحديد المستوى الحالي
+                // إعدادات المستوى الجديد
+                currentScore = 0;
+                currentLives = 3;
                 gameState = STATE_GAME_PLAY;
                 canvas.repaint();
             } else if(mx >= level2X && mx <= level2X+levelW && my >= level2Y && my <= level2Y+levelH){
                 if(clickSound != null) clickSound.play();
                 currentBgTex = level2BgTex;
+                currentLevel = 2; // تحديد المستوى الحالي
+                currentScore = 0;
+                currentLives = 3;
                 gameState = STATE_GAME_PLAY;
                 canvas.repaint();
             } else if(mx >= level3X && mx <= level3X+levelW && my >= level3Y && my <= level3Y+levelH){
                 if(clickSound != null) clickSound.play();
                 currentBgTex = level3BgTex;
+                currentLevel = 3; // تحديد المستوى الحالي
+                currentScore = 0;
+                currentLives = 3;
                 gameState = STATE_GAME_PLAY;
                 canvas.repaint();
             }
         }
-        // *** منطق النقر في حالة اللعب: العودة إلى شاشة اختيار المستويات ***
         else if (gameState == STATE_GAME_PLAY) {
-            if(mx >= backX && mx <= backX+backW && my >= backY && my <= backY+backH){
+            // النقر على زر الإيقاف المؤقت (Pause)
+            if(mx >= pauseX && mx <= pauseX+pauseW && my >= pauseY && my <= pauseY+pauseH){
                 if(clickSound != null) clickSound.play();
-                gameState = STATE_LEVEL_SELECT; // العودة من اللعب إلى اختيار المستويات
+                gameState = STATE_PAUSE;
+                canvas.repaint();
+            }
+            // لتجربة شاشة نهاية اللعبة: افترض أن هناك شيئاً يجعل الأرواح صفر
+            // if (currentLives > 0) currentLives--; else gameState = STATE_GAME_OVER;
+        }
+        else if (gameState == STATE_PAUSE) {
+            // النقر على زر Resume (استئناف اللعب)
+            if(mx >= resumeX && mx <= resumeX+resumeW && my >= resumeY && my <= resumeY+resumeH){
+                if(clickSound != null) clickSound.play();
+                gameState = STATE_GAME_PLAY;
+                canvas.repaint();
+            }
+            // يمكن إضافة زر للعودة إلى شاشة اختيار المستويات هنا أيضًا
+        }
+        else if (gameState == STATE_GAME_OVER) {
+            // النقر على زر Retry (إعادة المحاولة)
+            if(mx >= retryX && mx <= retryX+retryW && my >= retryY && my <= retryY+retryH){
+                if(clickSound != null) clickSound.play();
+                // إعادة تهيئة المستوى الحالي
+                currentScore = 0;
+                currentLives = 3;
+                gameState = STATE_GAME_PLAY; // العودة إلى اللعب
                 canvas.repaint();
             }
         }
