@@ -28,7 +28,7 @@ public class rockManager implements GLEventListener {
         GL gl = gld.getGL();
         gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        gl.glEnable(GL.GL_TEXTURE_2D);  // Enable Texture Mapping
+        gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
         gl.glGenTextures(textureNames.length, textures, 0);
 
@@ -82,11 +82,11 @@ public class rockManager implements GLEventListener {
     }
     public void DrawSprite(GL gl,int x, int y, int index, float scale){
         gl.glEnable(GL.GL_BLEND);
-        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);	// Turn Blending On
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);
 
         gl.glPushMatrix();
         gl.glTranslated( x/(constants.FRAME_WIDTH/2.0) - 0.9, y/(constants.FRAME_HEIGHT/2.0) - 0.9, 0);
-        gl.glScaled(0.1*scale, 0.1*scale, 1);
+        gl.glScaled(0.05, 0.05, 1);
 
         gl.glBegin(GL.GL_QUADS);
 

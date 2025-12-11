@@ -152,7 +152,7 @@ public class MenuRenderer {
         if (level1Tex != null) drawButton(gl, level1Tex, level1X, level1Y, levelW, levelH);
         if (level2Tex != null) drawButton(gl, level2Tex, level2X, level2Y, levelW, levelH);
         if (level3Tex != null) drawButton(gl, level3Tex, level3X, level3Y, levelW, levelH);
-//        if (btnBack != null) drawButton(gl, btnBack, backX, backY, backW, backH);
+       if (btnBack != null) drawButton(gl, btnBack, backX, backY, backW, backH);
     }
 
     public void drawPauseMenu(GL gl, int w, int h) {

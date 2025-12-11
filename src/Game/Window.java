@@ -27,25 +27,22 @@ public class Window {
 
             GameManager gameManager = new GameManager();
 
-            // create ship and controls (your existing classes)
+
             SpaceShip ship = new SpaceShip("src/assets/Space_ship.png");
             Controls controls = new Controls("src/assets/fire.png");
 
-            // create the game canvas and pass GameManager
+
             GameTestCanvas gameCanvas = new GameTestCanvas(gameManager, ship, controls);
             gameCanvas.addKeyListener(controls);
             gameCanvas.setFocusable(true);
 
-            // create menuRenderer with reference to gameCanvas
+
             MenuRenderer menuRenderer = new MenuRenderer(gameManager, menuCanvas, gameCanvas);
 
-            // renderer that draws menu and delegates gameplay to gameCanvas
+
             Renderer renderer = new Renderer(menuCanvas, gameManager, menuRenderer, gameCanvas);
             menuCanvas.addGLEventListener(renderer);
 
-            // We don't register gameCanvas as a top-level GLCanvas in the CardLayout,
-            // because Renderer will call gameCanvas.display(drawable) when needed.
-            // But to keep original approach with two canvases, we can still add it:
             frame.setLayout(new CardLayout());
             frame.add(menuCanvas, "MENU");
             frame.add(gameCanvas, "GAME");
@@ -67,7 +64,7 @@ public class Window {
 
             menuCanvas.requestFocusInWindow();
 
-            // Poll the game state and switch cards on EDT
+
             new Thread(() -> {
                 int lastState = gameManager.getGameState();
                 while (true) {
