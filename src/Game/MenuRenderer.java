@@ -12,7 +12,7 @@ public class MenuRenderer {
     private final GameManager gameManager;
     private final GLCanvas canvas;
 
-    // --- Textures ---
+
     public Texture background, levelBackground;
     public Texture btnStart, btnExit;
     public Texture level1Tex, level2Tex, level3Tex;
@@ -21,7 +21,7 @@ public class MenuRenderer {
     public Texture btnPause, btnResume, btnHome; // زر Home
     public Texture gameOverScreenTex, btnRetry;
 
-    // --- الأبعاد والمواقع ---
+
     public int startX, startY, startW, startH;
     public int exitX, exitY, exitW, exitH;
     public int level1X, level1Y, level2X, level2Y, level3X, level3Y, levelW, levelH;
@@ -37,15 +37,13 @@ public class MenuRenderer {
         this.canvas = canvas;
     }
 
-    /**
-     * دالة مُحسَّنة لتحميل Texture باستخدام InputStream.
-     */
+
     private Texture loadTexture(String path) throws IOException {
-        // البحث عن المورد عبر ClassLoader
+
         InputStream stream = getClass().getClassLoader().getResourceAsStream(path);
 
         if (stream == null) {
-            // محاولة بديلة إذا فشل البحث الأول
+
             stream = getClass().getResourceAsStream("/" + path);
         }
 
@@ -63,7 +61,7 @@ public class MenuRenderer {
 
     public void init(GL gl, int canvasW, int canvasH) {
         try {
-            // تحميل جميع الـ Textures
+
             background = loadTexture("assets/back_1.png");
             levelBackground = loadTexture("assets/back2.png");
             btnStart = loadTexture("assets/sst.png");
@@ -118,33 +116,30 @@ public class MenuRenderer {
         pauseX = canvasW - pauseW - 20;
         pauseY = canvasH - pauseH - 20;
 
-        // Resume Button (تم تكبير الأبعاد)
-        resumeW = 250; // كان 200 - تم التكبير
-        resumeH = 100; // كان 80 - تم التكبير
 
-        // إعادة حساب موقع X لضمان التوسيط بعد التكبير
+        resumeW = 250;
+        resumeH = 100;
+
+
         resumeX = (canvasW - resumeW) / 2;
-        resumeY = (canvasH / 2) + 60; // تم رفعه قليلاً ليتناسب مع الحجم الجديد
+        resumeY = (canvasH / 2) + 60;
 
-        // Home Button (تم تعديل موقعه ليبقى أسفل Resume)
+
         homeW = 200; homeH = 80;
         homeX = (canvasW - homeW) / 2;
         homeY = resumeY - homeH - 40;
 
-        // Game Over Screen
+
         gameOverW = 600; gameOverH = 400;
         gameOverX = (canvasW - gameOverW) / 2;
         gameOverY = (canvasH - gameOverH) / 2;
 
-        // Retry Button
+
         retryW = 200; retryH = 80;
         retryX = (canvasW - retryW) / 2;
         retryY = gameOverY + 50;
     }
 
-    // ------------------------------------
-    // --- الدوال الخاصة بالرسم (Rendering) ---
-    // ------------------------------------
 
     public void drawCurrentBackground(GL gl, int w, int h) {
         Texture currentBackground = null;
@@ -180,7 +175,7 @@ public class MenuRenderer {
     }
 
     public void drawPauseMenu(GL gl, int w, int h) {
-        // خلفية سوداء شفافة
+
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
         gl.glBegin(GL.GL_QUADS);
@@ -197,7 +192,7 @@ public class MenuRenderer {
         if (gameOverScreenTex != null) drawButton(gl, gameOverScreenTex, gameOverX, gameOverY, gameOverW, gameOverH);
         if (btnRetry != null) drawButton(gl, btnRetry, retryX, retryY, retryW, retryH);
 
-        // عرض Final Score Placeholder
+
         int placeholderW = 250;
         int placeholderH = 30;
         int placeholderY = retryY + 100;
@@ -211,7 +206,7 @@ public class MenuRenderer {
         gl.glVertex2f(placeholderX + placeholderW, placeholderY + placeholderH);
         gl.glVertex2f(placeholderX, placeholderY + placeholderH);
         gl.glEnd();
-        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // إعادة اللون
+        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         gl.glEnable(GL.GL_TEXTURE_2D);
     }
 
@@ -227,9 +222,7 @@ public class MenuRenderer {
         gl.glEnd();
     }
 
-    // ------------------------------------
-    // --- التعامل مع النقر (Mouse Logic) ---
-    // ------------------------------------
+
 
     public void handleMouseClick(int mx, int my) {
         int state = gameManager.getGameState();
@@ -263,12 +256,12 @@ public class MenuRenderer {
                 gameManager.setGameState(GameManager.STATE_PAUSE);
             }
         } else if (state == GameManager.STATE_PAUSE) {
-            // 1. زر Resume
+
             if (isClicked(mx, my, resumeX, resumeY, resumeW, resumeH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_GAME_PLAY);
             }
-            // 2. زر Home/Back
+
             else if (isClicked(mx, my, homeX, homeY, homeW, homeH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_LEVEL_SELECT);
