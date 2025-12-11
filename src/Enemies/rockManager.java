@@ -26,7 +26,7 @@ public class rockManager implements GLEventListener {
     @Override
     public void init(GLAutoDrawable gld) {
         GL gl = gld.getGL();
-        gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);    //This Will Clear The Background Color To Black
+        gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         gl.glEnable(GL.GL_TEXTURE_2D);  // Enable Texture Mapping
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -37,14 +37,14 @@ public class rockManager implements GLEventListener {
                 texture[i] = TextureReader.readTexture(assetsFolderName + "//" + textureNames[i] , true);
                 gl.glBindTexture(GL.GL_TEXTURE_2D, textures[i]);
 
-//                mipmapsFromPNG(gl, new GLU(), texture[i]);
+
                 new GLU().gluBuild2DMipmaps(
                         GL.GL_TEXTURE_2D,
-                        GL.GL_RGBA, // Internal Texel Format,
+                        GL.GL_RGBA,
                         texture[i].getWidth(), texture[i].getHeight(),
-                        GL.GL_RGBA, // External format from image,
+                        GL.GL_RGBA,
                         GL.GL_UNSIGNED_BYTE,
-                        texture[i].getPixels() // Imagedata
+                        texture[i].getPixels()
                 );
             } catch( IOException e ) {
                 System.out.println(e);
@@ -61,12 +61,12 @@ public class rockManager implements GLEventListener {
     @Override
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
-     //   gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+
         gl.glLoadIdentity();
         for(int i = 0; i < rock; i++){
             DrawSprite(gl, rockX[i], rockY[i], 6, 1);
             UpdateRock(rockY[i], i );
-           // checkBlueCollision(i);
+
         }
 
     }
@@ -112,39 +112,7 @@ public class rockManager implements GLEventListener {
         }
     }
 
-    public boolean isColliding(int x1, int y1, int w1, int h1,
-                               int x2, int y2, int w2, int h2,float scale) {
-        int realW1 = (int)(w1 * scale);
-        int realH1 = (int)(h1 * scale);
-        return x1 < x2 + w2 &&
-                x1 + w1 > x2 &&
-                y1 < y2 + h2 &&
-                y1 + h1 > y2;
-    }
-//    public void checkBlueCollision(int i) {
-//        int w = 60, h = 60;
-//
-//        if (isColliding(x, y, w, h, blueX[i], blueY[i], w, h ,scale)) {
-//            // Example: remove monster
-//            blueY[i] = -1000;
-//            blueX[i] = 10+(int)(Math.random()*maxWidth);
-//            // Example effect: make soldier bigger
-//            scale+= 0.2f;
-//
-//
-////            System.out.println("Touched BLUE monster " + i);
-//        }
-    }
-//    public void checkRedCollision(int i) {
-//        int w = 60, h = 60;
-//
-//        if (isColliding(x, y, w, h, redX[i], redY[i], w, h,scale)) {
-//            redY[i] = -1000;
-//            redX[i] = 10+(int)(Math.random()*maxWidth);// remove monster
-//            scale -= 0.2f;              // أنقص الحجم بمقدار 0.2
-//            if (scale < 0.3f) scale = 0.3f;
-//
-//        }
-//    }
+}
+
 
 
