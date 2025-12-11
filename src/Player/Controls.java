@@ -10,7 +10,10 @@ public class Controls implements KeyListener {
     private BitSet keyBits = new BitSet(256);
     public List<Bullet> bullets = new ArrayList<>();
     private String bulletImagePath = "src/assets/Bullet.png";
-    public int level = 1;
+    public int level = 2;
+    private long lastFireTime = 0;
+    private long fireCooldown = 250;
+
 
     public Controls(String bulletImagePath) {
         this.bulletImagePath = bulletImagePath;
@@ -44,32 +47,32 @@ public class Controls implements KeyListener {
 
     }
 
-private void fireBullet(SpaceShip ship) {
-    int bulletWidth = 50;
-    int bulletHeight = 80;
 
-    float startY = ship.getY() + ship.getHeight() - bulletHeight;
+    private void fireBullet(SpaceShip ship) {
+        long now = System.currentTimeMillis();
+        if (now - lastFireTime < fireCooldown) return;
+        lastFireTime = now;
 
+        int bulletWidth = 50;
+        int bulletHeight = 80;
 
-    float center = ship.getX() + ship.getWidth() / 2f - bulletWidth / 2f;
-    float left   = ship.getX() + ship.getWidth() * 0.25f - bulletWidth / 2f;
-    float right  = ship.getX() + ship.getWidth() * 0.75f - bulletWidth / 2f;
+        float startY = ship.getY() + ship.getHeight() - bulletHeight;
 
-    if (level == 1) {
-        bullets.add(new Bullet(bulletImagePath, center, startY, bulletWidth, bulletHeight));
+        float center = ship.getX() + ship.getWidth() / 2f - bulletWidth / 2f;
+        float left   = ship.getX() + ship.getWidth() * 0.25f - bulletWidth / 2f;
+        float right  = ship.getX() + ship.getWidth() * 0.75f - bulletWidth / 2f;
+
+        if (level == 1) {
+            bullets.add(new Bullet(bulletImagePath, center, startY, bulletWidth, bulletHeight));
+        }
+        else if (level == 2) {
+            bullets.add(new Bullet(bulletImagePath, left, startY, bulletWidth, bulletHeight));
+            bullets.add(new Bullet(bulletImagePath, right, startY, bulletWidth, bulletHeight));
+        }
+        else if (level == 3) {
+            bullets.add(new Bullet(bulletImagePath, left, startY, bulletWidth, bulletHeight));
+            bullets.add(new Bullet(bulletImagePath, center, startY, bulletWidth, bulletHeight));
+            bullets.add(new Bullet(bulletImagePath, right, startY, bulletWidth, bulletHeight));
+        }
     }
-
-    else if (level == 2) {
-        bullets.add(new Bullet(bulletImagePath, left, startY, bulletWidth, bulletHeight));
-        bullets.add(new Bullet(bulletImagePath, right, startY, bulletWidth, bulletHeight));
-    }
-
-    else if (level == 3) {
-        bullets.add(new Bullet(bulletImagePath, left, startY, bulletWidth, bulletHeight));
-        bullets.add(new Bullet(bulletImagePath, center, startY, bulletWidth, bulletHeight));
-        bullets.add(new Bullet(bulletImagePath, right, startY, bulletWidth, bulletHeight));
-    }
-}
-
-
 }
