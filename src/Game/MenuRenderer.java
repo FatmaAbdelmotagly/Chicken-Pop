@@ -271,6 +271,7 @@ public class MenuRenderer {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.resetLevel(gameManager.getCurrentLevel(), gameManager.getCurrentBgTex());
             }
+
         }
         canvas.repaint();
     }
