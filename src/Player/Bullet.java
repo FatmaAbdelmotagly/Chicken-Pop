@@ -17,7 +17,7 @@ public class Bullet {
     public Bullet(String imagePath, float startX, float startY, int width, int height) {
         this.width = width;
         this.height = height;
-        this.speed = 10;
+        this.speed = 15;
         this.x = startX;
         this.y = startY;
         this.active = true;

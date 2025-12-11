@@ -13,6 +13,8 @@ public class GameCanvas implements GLEventListener {
     private FPSAnimator animator;
     private ArrayList<Bullet> bullets;
 
+
+
     public GameCanvas(SpaceShip ship, Controls controls) {
         this.ship = ship;
         this.controls = controls;
