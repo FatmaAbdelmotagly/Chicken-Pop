@@ -35,6 +35,7 @@ public class MenuRenderer {
     public MenuRenderer(GameManager gameManager, GLCanvas canvas) {
         this.gameManager = gameManager;
         this.canvas = canvas;
+
     }
 
 
@@ -236,7 +237,8 @@ public class MenuRenderer {
                 if (gameManager.getGameMusic() != null) gameManager.getGameMusic().stop();
                 System.exit(0);
             }
-        } else if (state == GameManager.STATE_LEVEL_SELECT) {
+        }
+        else if (state == GameManager.STATE_LEVEL_SELECT) {
             if (isClicked(mx, my, backX, backY, backW, backH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_MENU);
@@ -250,31 +252,35 @@ public class MenuRenderer {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.resetLevel(3, level3BgTex);
             }
-        } else if (state == GameManager.STATE_GAME_PLAY) {
+        }
+        else if (state == GameManager.STATE_GAME_PLAY) {
             if (isClicked(mx, my, pauseX, pauseY, pauseW, pauseH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_PAUSE);
             }
-        } else if (state == GameManager.STATE_PAUSE) {
-
+        }
+        else if (state == GameManager.STATE_PAUSE) {
             if (isClicked(mx, my, resumeX, resumeY, resumeW, resumeH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_GAME_PLAY);
             }
-
             else if (isClicked(mx, my, homeX, homeY, homeW, homeH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_LEVEL_SELECT);
             }
-        } else if (state == GameManager.STATE_GAME_OVER) {
+        }
+        else if (state == GameManager.STATE_GAME_OVER) {
             if (isClicked(mx, my, retryX, retryY, retryW, retryH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.resetLevel(gameManager.getCurrentLevel(), gameManager.getCurrentBgTex());
             }
-
         }
-        canvas.repaint();
+
+        // 🔥 أهم خطوة عشان الزرار يشتغل
+        canvas.display();
     }
+
+
 
     private boolean isClicked(int mx, int my, int x, int y, int w, int h) {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;

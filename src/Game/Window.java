@@ -1,5 +1,9 @@
 package Game;
 
+import Player.Controls;
+import Player.GameTestCanvas;
+import Player.SpaceShip;
+
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,15 +24,16 @@ public class Window {
             Frame frame = new Frame("Chicken pop");
             GLCapabilities caps = new GLCapabilities();
             GLCanvas canvas = new GLCanvas(caps);
-
+            SpaceShip ship=new SpaceShip("Space_ship.png");
+            Controls controls=new Controls("fire.png");
 
             GameManager gameManager = new GameManager();
-
+            GameTestCanvas gameTestCanvas=new GameTestCanvas(ship,controls);
 
             MenuRenderer menuRenderer = new MenuRenderer(gameManager, canvas);
 
 
-            Renderer renderer = new Renderer(canvas, gameManager, menuRenderer);
+            Renderer renderer = new Renderer(canvas, gameManager, menuRenderer ,gameTestCanvas );
             canvas.addGLEventListener(renderer);
 
 

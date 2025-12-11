@@ -17,7 +17,7 @@ public class ChickenManager implements GLEventListener {
     int animationIndex = 0;
     static FPSAnimator animator =null;
     String assetsFolderName = "assets";
-    String textureNames[] = {"Chicken_2.png","Chicken_1.png","Chicken_3.png","Chicken_4.png"};
+    String textureNames[] = {"Chicken_2.png","Chicken_1.png","Chicken_3.png","Chicken_4.png","gift.png","gift.png"};
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
     int frameCounter = 0;

@@ -1,5 +1,6 @@
 package Player;
 import Enemies.rockManager;
+import Game.Renderer;
 import com.sun.opengl.util.GLUT;
 
 import Enemies.ChickenManager;
@@ -11,11 +12,12 @@ import texture.constants;
 
 import java.util.List;
 
-public class GameTestCanvas extends GLCanvas implements GLEventListener {
+public class GameTestCanvas implements GLEventListener {
 
     private SpaceShip ship;
     private Controls controls;
     private FPSAnimator animator;
+
     private ChickenManager chickenManager;
     private rockManager rocks;
     private int score = 0;
@@ -29,7 +31,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
         chickenManager = new ChickenManager();
         chickenManager.level(1);
 
-        addGLEventListener(this);
+
     }
 
     @Override
@@ -39,6 +41,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
         ship.init(gl);
         chickenManager.init(drawable);
         rocks.init(drawable);
+
         gl.glClearColor(0f, 0f, 0f, 1f);
 
         animator = new FPSAnimator(drawable, 60);

@@ -1,6 +1,8 @@
 package Game;
 
 import javax.media.opengl.*;
+
+import Player.GameTestCanvas;
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 import java.awt.event.MouseEvent;
@@ -15,18 +17,17 @@ public class Renderer implements GLEventListener, MouseListener {
     private final MenuRenderer menuRenderer;
     private final GLCanvas canvas;
 
-
+    private GameTestCanvas gamePlayRenderer;
     private Texture lifeHeartTex;
 
 
 
-    public Renderer(GLCanvas canvas, GameManager gameManager, MenuRenderer menuRenderer){
+    public Renderer(GLCanvas canvas, GameManager gameManager, MenuRenderer menuRenderer, GameTestCanvas gamePlayRenderer) {
         this.canvas = canvas;
         this.gameManager = gameManager;
         this.menuRenderer = menuRenderer;
-        canvas.addMouseListener(this);
+        this.gamePlayRenderer = gamePlayRenderer;
     }
-
     private Texture loadTexture(String path) throws IOException {
         InputStream stream = getClass().getClassLoader().getResourceAsStream(path);
 
@@ -149,14 +150,16 @@ public class Renderer implements GLEventListener, MouseListener {
         } else if(state == GameManager.STATE_LEVEL_SELECT) {
             menuRenderer.drawLevelSelectionScreen(gl);
         } else if(state == GameManager.STATE_GAME_PLAY) {
-
+            gamePlayRenderer.display(drawable);
             drawHUD(gl, w, h);
+
         } else if(state == GameManager.STATE_PAUSE) {
             drawHUD(gl, w, h);
             menuRenderer.drawPauseMenu(gl, w, h);
         } else if(state == GameManager.STATE_GAME_OVER) {
             menuRenderer.drawGameOverScreen(gl, w, h);
         }
+
     }
 
 
