@@ -1,4 +1,5 @@
 package Player;
+import com.sun.opengl.util.GLUT;
 
 import Enemies.ChickenManager;
 import javax.media.opengl.*;
@@ -13,6 +14,9 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     private Controls controls;
     private FPSAnimator animator;
     private ChickenManager chickenManager;
+    private int score = 0;
+    private GLUT glut = new GLUT();
+
 
     public GameTestCanvas(SpaceShip ship, Controls controls) {
         this.ship = ship;
@@ -81,6 +85,8 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
                 if (collision) {
                     chickens.remove(j);
                     bullets.remove(i);
+                    score += 5;
+                    System.out.println("Score = " + score);
                     i--;
                     break;
                 }
@@ -89,6 +95,13 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
 
 
         ship.draw(gl);
+
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glColor3f(1f, 1f, 1f);
+        gl.glRasterPos2f(-0.95f, 0.9f);
+        glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Score: " + score);
+        gl.glEnable(GL.GL_TEXTURE_2D);
+
     }
 
 
@@ -99,4 +112,6 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
 
     @Override
     public void displayChanged(GLAutoDrawable d, boolean m, boolean d2) {}
+
+
 }

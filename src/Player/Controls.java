@@ -15,6 +15,7 @@ public class Controls implements KeyListener {
     private long fireCooldown = 250;
 
 
+
     public Controls(String bulletImagePath) {
         this.bulletImagePath = bulletImagePath;
     }
