@@ -132,5 +132,3 @@ public class ChickenManager implements GLEventListener {
     @Override
     public void displayChanged(GLAutoDrawable glAutoDrawable, boolean b, boolean b1) {}
 }
-
-
