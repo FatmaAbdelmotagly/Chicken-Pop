@@ -10,10 +10,10 @@ public class Controls implements KeyListener {
     private BitSet keyBits = new BitSet(256);
     public List<Bullet> bullets = new ArrayList<>();
     private String bulletImagePath = "src/assets/Bullet.png";
-    public int level = 2;
+    public int level = 1;
     private long lastFireTime = 0;
     private long fireCooldown = 250;
-
+    private int score = 0;
 
 
     public Controls(String bulletImagePath) {

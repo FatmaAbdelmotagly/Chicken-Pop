@@ -5,7 +5,6 @@ import com.sun.opengl.util.texture.Texture;
 
 public class GameManager {
 
-
     public static final int STATE_MENU = 0;
     public static final int STATE_LEVEL_SELECT = 1;
     public static final int STATE_GAME_PLAY = 2;
@@ -18,18 +17,14 @@ public class GameManager {
     private int currentLives = 3;
     private Texture currentBgTex = null;
 
-
     private Sound clickSound;
     private Sound gameMusic;
 
     public GameManager() {
-
         clickSound = new Sound("click.wav");
         gameMusic = new Sound("game sound.wav");
-        if(gameMusic != null) gameMusic.loop();
+        if (gameMusic != null) gameMusic.loop();
     }
-
-
 
     public int getGameState() { return gameState; }
     public void setGameState(int gameState) { this.gameState = gameState; }

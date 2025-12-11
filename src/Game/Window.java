@@ -1,43 +1,55 @@
 package Game;
 
-import Player.Controls;
-import Player.GameTestCanvas;
-import Player.SpaceShip;
-
-import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCanvas;
+import java.awt.Frame;
+import java.awt.CardLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.SwingUtilities;
+import Player.GameTestCanvas;
+import Player.SpaceShip;
+import Player.Controls;
 
 public class Window {
 
     private static final int DEFAULT_WIDTH = 1000;
     private static final int DEFAULT_HEIGHT = 800;
 
-
     public Window() {
 
         SwingUtilities.invokeLater(() -> {
 
             Frame frame = new Frame("Chicken pop");
+
             GLCapabilities caps = new GLCapabilities();
-            GLCanvas canvas = new GLCanvas(caps);
-            SpaceShip ship=new SpaceShip("Space_ship.png");
-            Controls controls=new Controls("fire.png");
+            GLCanvas menuCanvas = new GLCanvas(caps);
 
             GameManager gameManager = new GameManager();
-            GameTestCanvas gameTestCanvas=new GameTestCanvas(ship,controls);
 
-            MenuRenderer menuRenderer = new MenuRenderer(gameManager, canvas);
+            // create ship and controls (your existing classes)
+            SpaceShip ship = new SpaceShip("src/assets/Space_ship.png");
+            Controls controls = new Controls("src/assets/fire.png");
 
+            // create the game canvas and pass GameManager
+            GameTestCanvas gameCanvas = new GameTestCanvas(gameManager, ship, controls);
+            gameCanvas.addKeyListener(controls);
+            gameCanvas.setFocusable(true);
 
-            Renderer renderer = new Renderer(canvas, gameManager, menuRenderer ,gameTestCanvas );
-            canvas.addGLEventListener(renderer);
+            // create menuRenderer with reference to gameCanvas
+            MenuRenderer menuRenderer = new MenuRenderer(gameManager, menuCanvas, gameCanvas);
 
+            // renderer that draws menu and delegates gameplay to gameCanvas
+            Renderer renderer = new Renderer(menuCanvas, gameManager, menuRenderer, gameCanvas);
+            menuCanvas.addGLEventListener(renderer);
 
-            frame.add(canvas);
+            // We don't register gameCanvas as a top-level GLCanvas in the CardLayout,
+            // because Renderer will call gameCanvas.display(drawable) when needed.
+            // But to keep original approach with two canvases, we can still add it:
+            frame.setLayout(new CardLayout());
+            frame.add(menuCanvas, "MENU");
+            frame.add(gameCanvas, "GAME");
+
             frame.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
@@ -45,7 +57,6 @@ public class Window {
             frame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-
                     if (gameManager.getGameMusic() != null) {
                         gameManager.getGameMusic().stop();
                     }
@@ -54,8 +65,32 @@ public class Window {
                 }
             });
 
+            menuCanvas.requestFocusInWindow();
 
-            canvas.requestFocusInWindow();
+            // Poll the game state and switch cards on EDT
+            new Thread(() -> {
+                int lastState = gameManager.getGameState();
+                while (true) {
+                    int state = gameManager.getGameState();
+                    if (state != lastState) {
+                        lastState = state;
+                        SwingUtilities.invokeLater(() -> {
+                            CardLayout cardLayout = (CardLayout) frame.getLayout();
+                            if (state == GameManager.STATE_GAME_PLAY) {
+                                cardLayout.show(frame, "GAME");
+                                gameCanvas.requestFocus();
+                            } else if (state == GameManager.STATE_MENU || state == GameManager.STATE_LEVEL_SELECT) {
+                                cardLayout.show(frame, "MENU");
+                                menuCanvas.requestFocus();
+                            }
+                        });
+                    }
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) { /* ignore */ }
+                }
+            }).start();
+
         });
     }
 }
