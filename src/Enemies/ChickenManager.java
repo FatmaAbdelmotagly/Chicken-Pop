@@ -16,11 +16,11 @@ public class ChickenManager implements GLEventListener {
     List<Chickens>chickensGroup;
     int animationIndex = 0;
     static FPSAnimator animator =null;
-    String assetsFolderName = "Assets";
+    String assetsFolderName = "assets";
     String textureNames[] = {"Chicken_2.png","Chicken_1.png","Chicken_3.png","Chicken_4.png"};
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
-
+    int frameCounter = 0;
 
 
     public List<Chickens> getChickens(){
@@ -107,7 +107,7 @@ public class ChickenManager implements GLEventListener {
     @Override
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+
         gl.glLoadIdentity();
         animationIndex = animationIndex % 4;
 
@@ -116,7 +116,12 @@ public class ChickenManager implements GLEventListener {
             draw(gl, chicken.x, chicken.y, animationIndex);
         }
 
-        animationIndex++;
+        if (frameCounter % 6 == 0) {
+            animationIndex++;
+        }
+        frameCounter++;
+        animationIndex %= 4;
+
 
 
     }
@@ -127,5 +132,3 @@ public class ChickenManager implements GLEventListener {
     @Override
     public void displayChanged(GLAutoDrawable glAutoDrawable, boolean b, boolean b1) {}
 }
-
-

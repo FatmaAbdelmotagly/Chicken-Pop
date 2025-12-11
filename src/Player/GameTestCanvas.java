@@ -1,10 +1,14 @@
 package Player;
+import Enemies.rockManager;
+import com.sun.opengl.util.GLUT;
 
 import Enemies.ChickenManager;
 import javax.media.opengl.*;
 
 import Enemies.Chickens;
 import com.sun.opengl.util.FPSAnimator;
+import texture.constants;
+
 import java.util.List;
 
 public class GameTestCanvas extends GLCanvas implements GLEventListener {
@@ -13,11 +17,15 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     private Controls controls;
     private FPSAnimator animator;
     private ChickenManager chickenManager;
+    private rockManager rocks;
+    private int score = 0;
+    private GLUT glut = new GLUT();
+
 
     public GameTestCanvas(SpaceShip ship, Controls controls) {
         this.ship = ship;
         this.controls = controls;
-
+        rocks=new rockManager();
         chickenManager = new ChickenManager();
         chickenManager.level(1);
 
@@ -30,7 +38,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
 
         ship.init(gl);
         chickenManager.init(drawable);
-
+        rocks.init(drawable);
         gl.glClearColor(0f, 0f, 0f, 1f);
 
         animator = new FPSAnimator(drawable, 60);
@@ -46,7 +54,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
         controls.handleKeyPress(ship);
         gl.glEnable(GL.GL_TEXTURE_2D);
         chickenManager.display(drawable);
-
+        rocks.display(drawable);
         List<Bullet> bullets = controls.bullets;
         for (Bullet b : bullets) {
             if (b.isActive()) {
@@ -57,6 +65,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
         bullets.removeIf(b -> !b.isActive());
 
         List<Chickens> chickens = chickenManager.getChickens();
+
 
         for (int i = 0; i < bullets.size(); i++) {
             Bullet b = bullets.get(i);
@@ -81,22 +90,66 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
                 if (collision) {
                     chickens.remove(j);
                     bullets.remove(i);
+                    score += 5;
+                    System.out.println("Score = " + score);
                     i--;
                     break;
                 }
             }
         }
+        int[] rx = rocks.getRockX();
+        int[] ry = rocks.getRockY();
+
+        float shipX = ship.getX();
+        float shipY = ship.getY();
+
+        int shipW = ship.getWidth();
+        int shipH = ship.getHeight();
+
+        for (int i = 0; i < rx.length; i++) {
+
+            int rockW = 40;
+            int rockH = 40;
+
+            boolean collision =
+                    shipX < rx[i] + rockW &&
+                            shipX + shipW > rx[i] &&
+                            shipY < ry[i] + rockH &&
+                            shipY + shipH > ry[i];
+
+            if (collision) {
+
+                ship.addHit();
+
+                System.out.println("Ship hit! Hits = " + ship.getHits());
 
 
-        ship.draw(gl);
+                ry[i] = constants.FRAME_HEIGHT + 100;
+
+
+                if (ship.getHits() >= 3) {
+                    ship.kill();
+                }
+
+                break;
+            }
+        }
+
+
+        if (ship.isAlive()) {
+            ship.draw(gl);
+        }
+        gl.glDisable(GL.GL_TEXTURE_2D);
+        gl.glColor3f(1f, 1f, 1f);
+        gl.glRasterPos2f(-0.95f, 0.9f);
+        glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Score: " + score);
+        gl.glEnable(GL.GL_TEXTURE_2D);
+
     }
-
-
     @Override
     public void reshape(GLAutoDrawable d, int x, int y, int w, int h) {
         d.getGL().glViewport(0, 0, w, h);
     }
-
     @Override
     public void displayChanged(GLAutoDrawable d, boolean m, boolean d2) {}
 }

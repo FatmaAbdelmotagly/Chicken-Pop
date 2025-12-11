@@ -13,6 +13,15 @@ public class SpaceShip {
     private Texture texture;
     private String imagePath;
 
+    private int hits = 0;
+    private boolean alive = true;
+
+    public int getHits() { return hits; }
+    public void addHit() { hits++; }
+
+    public boolean isAlive() { return alive; }
+    public void kill() { alive = false; }
+
     public SpaceShip(String imagePath) {
         this.width = constants.PLAYER_WIDTH;
         this.height = constants.PLAYER_HEIGHT;
@@ -31,6 +40,7 @@ public class SpaceShip {
 
     public void draw(GL gl) {
         if (texture == null) return;
+        if (!alive) return;
 
         gl.glEnable(GL.GL_BLEND);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
