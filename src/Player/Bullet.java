@@ -1,3 +1,4 @@
+
 package Player;
 
 import javax.media.opengl.GL;
@@ -61,4 +62,9 @@ public class Bullet {
     public boolean isActive() {
         return active;
     }
+    public float getX() { return x; }
+    public float getY() { return y; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+
 }
