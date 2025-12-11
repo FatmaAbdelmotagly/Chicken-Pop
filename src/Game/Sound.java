@@ -48,7 +48,7 @@ public class Sound {
         }
     }
 
-    // إيقاف الصوت
+
     public void stop() {
         if (clip != null) {
             clip.stop();
