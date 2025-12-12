@@ -1,5 +1,6 @@
 package Player;
 
+import Enemies.rockManager;
 import com.sun.opengl.util.GLUT;
 import Enemies.ChickenManager;
 import javax.media.opengl.*;
@@ -10,19 +11,23 @@ import com.sun.opengl.util.texture.TextureIO;
 import java.io.File;
 import java.util.List;
 import Game.GameManager;
+import texture.constants;
 
 public class GameTestCanvas extends GLCanvas implements GLEventListener {
 
-    private int level = 0;
+    private int level    = 0;
     private SpaceShip ship;
     private Controls controls;
     private com.sun.opengl.util.FPSAnimator animator;
     private ChickenManager chickenManager;
-    private int score = 0;
+    private rockManager rocks;
+    private int score = 0    ;
     private GLUT glut = new GLUT();
 
     private Texture background;
     private final GameManager gameManager;
+    private Texture heartTexture;
+    private Texture gameOverTexture;
 
     public GameTestCanvas(GameManager gameManager, SpaceShip ship, Controls controls ) {
         this.gameManager = gameManager;
@@ -30,7 +35,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
         this.controls = controls;
 
         chickenManager = new ChickenManager();
-
+rocks=new rockManager();
 
         addGLEventListener(this);
     }
@@ -55,6 +60,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     public void init(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
+
         try {
             background = TextureIO.newTexture(
                     new File("src/assets/back2.png"),
@@ -63,9 +69,24 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        try {
+            gameOverTexture = TextureIO.newTexture(
+                    new File("src/assets/gameover.png"),
+                    true
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         ship.init(gl);
         chickenManager.init(drawable);
+        rocks.init(drawable);
+        try {
+            heartTexture = TextureIO.newTexture(
+                    new File("src/assets/heart.png"), true
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         gl.glClearColor(0f, 0f, 0f, 1f);
 
@@ -106,7 +127,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
             controls.handleKeyPress(ship);
             gl.glEnable(GL.GL_TEXTURE_2D);
             chickenManager.display(drawable);
-
+rocks.display(drawable);
             List<Bullet> bullets = controls.bullets;
             for (int bi = 0; bi < bullets.size(); bi++) {
                 Bullet b = bullets.get(bi);
@@ -151,7 +172,47 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
                 }
             }
 
-            ship.draw(gl);
+            int[] rx = rocks.getRockX();
+            int[] ry = rocks.getRockY();
+
+            float shipX = ship.getX();
+            float shipY = ship.getY();
+
+            int shipW = ship.getWidth();
+            int shipH = ship.getHeight();
+
+            for (int i = 0; i < rx.length; i++) {
+
+                int rockW = 40;
+                int rockH = 40;
+
+                boolean collision =
+                        shipX < rx[i] + rockW &&
+                                shipX + shipW > rx[i] &&
+                                shipY < ry[i] + rockH &&
+                                shipY + shipH > ry[i];
+
+                if (collision) {
+
+                    ship.addHit();
+                    System.out.println("Ship hit! Hits = " + ship.getHits());
+
+                    ry[i] = constants.FRAME_HEIGHT + 100;
+
+
+                    if (ship.getHits() >= 3) {
+                        ship.kill();
+                    }
+                    break;
+                }
+            }
+            if (ship.isAlive()) {
+                ship.draw(gl);
+            }
+            if (!ship.isAlive()) {
+                drawGameOver(gl);
+                return;
+            }
 
             gl.glDisable(GL.GL_TEXTURE_2D);
             gl.glColor3f(1f, 1f, 1f);
@@ -159,8 +220,55 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
             glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Score: " + score);
             gl.glEnable(GL.GL_TEXTURE_2D);
         }
+        drawHearts(gl);
     }
+    private void drawHearts(GL gl) {
+        if (heartTexture == null) return;
 
+        heartTexture.enable();
+        heartTexture.bind();
+
+        int heartsLeft = 3 - ship.getHits();
+
+        float x = -0.95f;
+        float y = 0.85f;
+        float size = 0.1f;
+
+        for (int i = 0; i < heartsLeft; i++) {
+            gl.glBegin(GL.GL_QUADS);
+
+            gl.glTexCoord2f(0, 1); gl.glVertex2f(x, y);
+            gl.glTexCoord2f(1, 1); gl.glVertex2f(x + size, y);
+            gl.glTexCoord2f(1, 0); gl.glVertex2f(x + size, y + size);
+            gl.glTexCoord2f(0, 0); gl.glVertex2f(x, y + size);
+
+            gl.glEnd();
+
+            x += size + 0.05f;
+        }
+
+        heartTexture.disable();
+    }
+    private void drawGameOver(GL gl) {
+        if (gameOverTexture == null) return;
+
+        gameOverTexture.enable();
+        gameOverTexture.bind();
+
+        float w = 0.6f;
+        float h = 0.3f;
+
+        gl.glBegin(GL.GL_QUADS);
+
+        gl.glTexCoord2f(0, 1); gl.glVertex2f(-w/2, -h/2);
+        gl.glTexCoord2f(1, 1); gl.glVertex2f( w/2, -h/2);
+        gl.glTexCoord2f(1, 0); gl.glVertex2f( w/2,  h/2);
+        gl.glTexCoord2f(0, 0); gl.glVertex2f(-w/2,  h/2);
+
+        gl.glEnd();
+
+        gameOverTexture.disable();
+    }
     @Override
     public void reshape(GLAutoDrawable glAutoDrawable, int i, int i1, int i2, int i3) {}
 

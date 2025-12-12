@@ -14,13 +14,16 @@ public class SpaceShip {
     private String imagePath;
     private int bulletsCount = 1;
     private int hits = 0;
-    private boolean alive = true;
+    boolean alive = true;
 
     public int getHits() { return hits; }
     public void addHit() { hits++; }
 
     public boolean isAlive() { return alive; }
     public void kill() { alive = false; }
+    public void setX (int x){this.x=x; }
+    public void setY (int y){this.y=y; }
+
 
     public SpaceShip(String imagePath) {
         this.width = constants.PLAYER_WIDTH;
@@ -95,7 +98,7 @@ public class SpaceShip {
         return width;
     }
     public int getHeight() {
-        return height;
+        return height ;
     }
 
     public void setBulletsCount(int level) {
