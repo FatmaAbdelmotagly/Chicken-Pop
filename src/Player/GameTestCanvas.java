@@ -20,7 +20,6 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     private ChickenManager chickenManager;
     private int score = 0;
     private GLUT glut = new GLUT();
-
     private Texture background;
 
     public GameTestCanvas(SpaceShip ship, Controls controls ) {

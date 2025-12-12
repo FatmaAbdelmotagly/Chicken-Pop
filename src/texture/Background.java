@@ -4,7 +4,6 @@ import com.sun.opengl.util.Animator;
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 import texture.constants;
-
 import javax.media.opengl.*;
 import javax.swing.*;
 import java.io.File;
