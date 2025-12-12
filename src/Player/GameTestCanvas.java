@@ -6,10 +6,14 @@ import javax.media.opengl.*;
 
 import Enemies.Chickens;
 import com.sun.opengl.util.FPSAnimator;
+import com.sun.opengl.util.texture.Texture;
+import com.sun.opengl.util.texture.TextureIO;
+
+import java.io.File;
 import java.util.List;
 
 public class GameTestCanvas extends GLCanvas implements GLEventListener {
-
+    private int level;
     private SpaceShip ship;
     private Controls controls;
     private FPSAnimator animator;
@@ -17,11 +21,12 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     private int score = 0;
     private GLUT glut = new GLUT();
 
+    private Texture background;
 
-    public GameTestCanvas(SpaceShip ship, Controls controls) {
+    public GameTestCanvas(SpaceShip ship, Controls controls ) {
         this.ship = ship;
         this.controls = controls;
-
+        this.level = level;
         chickenManager = new ChickenManager();
         chickenManager.level(1);
 
@@ -29,8 +34,18 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     }
 
     @Override
+
     public void init(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
+
+        try {
+            background = TextureIO.newTexture(
+                    new File("src/assets/back2.png"),
+                    true
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         ship.init(gl);
         chickenManager.init(drawable);
@@ -40,16 +55,37 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
         animator = new FPSAnimator(drawable, 60);
         animator.start();
     }
+
     @Override
+
     public void display(GLAutoDrawable drawable) {
 
         GL gl = drawable.getGL();
 
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
+
+        gl.glEnable(GL.GL_TEXTURE_2D);
+        if (background != null) {
+            background.enable();
+            background.bind();
+
+            gl.glBegin(GL.GL_QUADS);
+            gl.glTexCoord2f(0f, 0f); gl.glVertex2f(-1f, -1f);
+            gl.glTexCoord2f(1f, 0f); gl.glVertex2f(1f, -1f);
+            gl.glTexCoord2f(1f, 1f); gl.glVertex2f(1f, 1f);
+            gl.glTexCoord2f(0f, 1f); gl.glVertex2f(-1f, 1f);
+            gl.glEnd();
+
+            background.disable();
+        }
+
         controls.handleKeyPress(ship);
+
+
         gl.glEnable(GL.GL_TEXTURE_2D);
         chickenManager.display(drawable);
+
 
         List<Bullet> bullets = controls.bullets;
         for (Bullet b : bullets) {
@@ -59,6 +95,9 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
             }
         }
         bullets.removeIf(b -> !b.isActive());
+
+
+
 
         List<Chickens> chickens = chickenManager.getChickens();
 
@@ -93,7 +132,6 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
             }
         }
 
-
         ship.draw(gl);
 
         gl.glDisable(GL.GL_TEXTURE_2D);
@@ -104,14 +142,13 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
 
     }
 
-
     @Override
-    public void reshape(GLAutoDrawable d, int x, int y, int w, int h) {
-        d.getGL().glViewport(0, 0, w, h);
+    public void reshape(GLAutoDrawable glAutoDrawable, int i, int i1, int i2, int i3) {
+
     }
 
     @Override
-    public void displayChanged(GLAutoDrawable d, boolean m, boolean d2) {}
+    public void displayChanged(GLAutoDrawable glAutoDrawable, boolean b, boolean b1) {
 
-
+    }
 }
