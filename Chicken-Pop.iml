@@ -7,9 +7,18 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="gluegen-rt1" level="application" />
-    <orderEntry type="library" exported="" name="jogl1" level="application" />
-    <orderEntry type="library" exported="" name="gluegen-rt2" level="application" />
-    <orderEntry type="library" exported="" name="lib64" level="application" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="file://D:/lib/JOGLwin/lib64" />
+        </CLASSES>
+        <JAVADOC />
+        <NATIVE>
+          <root url="file://D:/lib/JOGLwin/lib64" />
+        </NATIVE>
+        <SOURCES />
+        <jarDirectory url="file://D:/lib/JOGLwin/lib64" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>
