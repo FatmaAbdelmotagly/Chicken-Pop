@@ -11,13 +11,20 @@ public class Controls implements KeyListener {
     public List<Bullet> bullets = new ArrayList<>();
     private String bulletImagePath = "src/assets/Bullet.png";
     public int level = 1;
+
     private long lastFireTime = 0;
     private long fireCooldown = 250;
     private int score = 0;
 
-
     public Controls(String bulletImagePath) {
         this.bulletImagePath = bulletImagePath;
+    }
+
+    //  ⭐⭐⭐ جديد ⭐⭐⭐
+    public void setLevel(int level) {
+        if (level < 1) level = 1;
+        if (level > 3) level = 3;
+        this.level = level;
     }
 
     @Override
@@ -45,9 +52,7 @@ public class Controls implements KeyListener {
         if(isPressed(KeyEvent.VK_SPACE)) {
             fireBullet(ship);
         }
-
     }
-
 
     private void fireBullet(SpaceShip ship) {
         long now = System.currentTimeMillis();

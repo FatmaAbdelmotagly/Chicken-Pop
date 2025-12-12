@@ -38,17 +38,18 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     public void setLevel(int lvl) {
         this.level = lvl;
 
-
         chickenManager = new ChickenManager();
         chickenManager.level(lvl);
-
 
         if (ship != null) {
             ship.setBulletsCount(lvl);
         }
 
+        controls.level = lvl;   // ← أهم سطر
+
         score = 0;
     }
+
 
     @Override
     public void init(GLAutoDrawable drawable) {
