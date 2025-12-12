@@ -12,7 +12,7 @@ public class SpaceShip {
     private int width, height;
     private Texture texture;
     private String imagePath;
-
+    private int bulletsCount = 1;
     private int hits = 0;
     private boolean alive = true;
 
@@ -96,5 +96,16 @@ public class SpaceShip {
     }
     public int getHeight() {
         return height;
+    }
+
+    public void setBulletsCount(int level) {
+        if (level <= 0) level = 1;
+        if (level == 1) bulletsCount = 1;
+        else if (level == 2) bulletsCount = 2;
+        else bulletsCount = 3;
+    }
+
+    public int getBulletsCount() {
+        return bulletsCount;
     }
 }

@@ -7,20 +7,20 @@ import com.sun.opengl.util.texture.TextureIO;
 import java.io.IOException;
 import java.io.InputStream;
 
+
 public class MenuRenderer {
 
     private final GameManager gameManager;
     private final GLCanvas canvas;
-
+    private final Player.GameTestCanvas gameCanvas;
 
     public Texture background, levelBackground;
     public Texture btnStart, btnExit;
     public Texture level1Tex, level2Tex, level3Tex;
     public Texture btnBack;
     public Texture level1BgTex, level2BgTex, level3BgTex;
-    public Texture btnPause, btnResume, btnHome; // زر Home
+    public Texture btnPause, btnResume, btnHome;
     public Texture gameOverScreenTex, btnRetry;
-
 
     public int startX, startY, startW, startH;
     public int exitX, exitY, exitW, exitH;
@@ -32,21 +32,16 @@ public class MenuRenderer {
     public int gameOverX, gameOverY, gameOverW, gameOverH;
     public int homeX, homeY, homeW, homeH;
 
-    public MenuRenderer(GameManager gameManager, GLCanvas canvas) {
+
+    public MenuRenderer(GameManager gameManager, GLCanvas canvas, Player.GameTestCanvas gameCanvas) {
         this.gameManager = gameManager;
         this.canvas = canvas;
+        this.gameCanvas = gameCanvas;
     }
 
-
     private Texture loadTexture(String path) throws IOException {
-
         InputStream stream = getClass().getClassLoader().getResourceAsStream(path);
-
-        if (stream == null) {
-
-            stream = getClass().getResourceAsStream("/" + path);
-        }
-
+        if (stream == null) stream = getClass().getResourceAsStream("/" + path);
         if (stream != null) {
             try {
                 return TextureIO.newTexture(stream, false, TextureIO.PNG);
@@ -54,14 +49,12 @@ public class MenuRenderer {
                 stream.close();
             }
         }
-
         System.err.println("TEXTURE NOT FOUND or failed to load: " + path);
         return null;
     }
 
     public void init(GL gl, int canvasW, int canvasH) {
         try {
-
             background = loadTexture("assets/back_1.png");
             levelBackground = loadTexture("assets/back2.png");
             btnStart = loadTexture("assets/sst.png");
@@ -79,6 +72,7 @@ public class MenuRenderer {
             btnRetry = loadTexture("assets/retry.png");
             btnHome = loadTexture("assets/bb2.png");
 
+
         } catch(IOException e){
             System.err.println("Failed to load resources: " + e.getMessage());
         }
@@ -86,9 +80,7 @@ public class MenuRenderer {
         calculatePositions(canvasW, canvasH);
     }
 
-
     public void calculatePositions(int canvasW, int canvasH) {
-        // Menu Buttons
         startW = exitW = 300; startH = exitH = 150;
         int spacing = 30;
         startX = (canvasW - startW)/2;
@@ -96,7 +88,6 @@ public class MenuRenderer {
         startY = (canvasH/2) - (startH/2) - 50;
         exitY  = startY - exitH - spacing;
 
-        // Level Buttons
         levelW = 350; levelH = 130;
         int padding = 30;
         int levelX = (canvasW - levelW)/2;
@@ -107,39 +98,29 @@ public class MenuRenderer {
         level2X = levelX; level2Y = startYPos + levelH + padding;
         level1X = levelX; level1Y = startYPos + (levelH*2) + (padding*2);
 
-        // Back Button
         backW = 150; backH = 70;
         backX = 20; backY = canvasH - backH - 20;
 
-        // Pause Button
         pauseW = 150; pauseH = 70;
         pauseX = canvasW - pauseW - 20;
         pauseY = canvasH - pauseH - 20;
 
-
-        resumeW = 250;
-        resumeH = 100;
-
-
+        resumeW = 250; resumeH = 100;
         resumeX = (canvasW - resumeW) / 2;
         resumeY = (canvasH / 2) + 60;
-
 
         homeW = 200; homeH = 80;
         homeX = (canvasW - homeW) / 2;
         homeY = resumeY - homeH - 40;
 
-
         gameOverW = 600; gameOverH = 400;
         gameOverX = (canvasW - gameOverW) / 2;
         gameOverY = (canvasH - gameOverH) / 2;
-
 
         retryW = 200; retryH = 80;
         retryX = (canvasW - retryW) / 2;
         retryY = gameOverY + 50;
     }
-
 
     public void drawCurrentBackground(GL gl, int w, int h) {
         Texture currentBackground = null;
@@ -171,11 +152,10 @@ public class MenuRenderer {
         if (level1Tex != null) drawButton(gl, level1Tex, level1X, level1Y, levelW, levelH);
         if (level2Tex != null) drawButton(gl, level2Tex, level2X, level2Y, levelW, levelH);
         if (level3Tex != null) drawButton(gl, level3Tex, level3X, level3Y, levelW, levelH);
-        if (btnBack != null) drawButton(gl, btnBack, backX, backY, backW, backH);
+//        if (btnBack != null) drawButton(gl, btnBack, backX, backY, backW, backH);
     }
 
     public void drawPauseMenu(GL gl, int w, int h) {
-
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
         gl.glBegin(GL.GL_QUADS);
@@ -183,7 +163,6 @@ public class MenuRenderer {
         gl.glEnd();
         gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         gl.glEnable(GL.GL_TEXTURE_2D);
-
         if (btnResume != null) drawButton(gl, btnResume, resumeX, resumeY, resumeW, resumeH);
         if (btnHome != null) drawButton(gl, btnHome, homeX, homeY, homeW, homeH);
     }
@@ -191,7 +170,6 @@ public class MenuRenderer {
     public void drawGameOverScreen(GL gl, int w, int h) {
         if (gameOverScreenTex != null) drawButton(gl, gameOverScreenTex, gameOverX, gameOverY, gameOverW, gameOverH);
         if (btnRetry != null) drawButton(gl, btnRetry, retryX, retryY, retryW, retryH);
-
 
         int placeholderW = 250;
         int placeholderH = 30;
@@ -212,7 +190,6 @@ public class MenuRenderer {
 
     public void drawButton(GL gl, Texture tex, int x, int y, int w, int h) {
         if (tex == null) return;
-
         tex.bind();
         gl.glBegin(GL.GL_QUADS);
         gl.glTexCoord2f(0, 1); gl.glVertex2f(x, y);
@@ -221,8 +198,6 @@ public class MenuRenderer {
         gl.glTexCoord2f(0, 0); gl.glVertex2f(x, y + h);
         gl.glEnd();
     }
-
-
 
     public void handleMouseClick(int mx, int my) {
         int state = gameManager.getGameState();
@@ -243,12 +218,18 @@ public class MenuRenderer {
             } else if (isClicked(mx, my, level1X, level1Y, levelW, levelH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.resetLevel(1, level1BgTex);
-            } else if (isClicked(mx, my, level2X, level2Y, levelW, levelH)) {
+                // Important: update gameCanvas so ChickenManager/ship know the level before first frame
+                if (gameCanvas != null) gameCanvas.setLevel(1);
+            }
+            else if (isClicked(mx,my, level2X, level2Y, levelW, levelH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.resetLevel(2, level2BgTex);
-            } else if (isClicked(mx, my, level3X, level3Y, levelW, levelH)) {
+                if (gameCanvas != null) gameCanvas.setLevel(2);
+            }
+            else if (isClicked(mx, my, level3X, level3Y, levelW, levelH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.resetLevel(3, level3BgTex);
+                if (gameCanvas != null) gameCanvas.setLevel(3);
             }
         } else if (state == GameManager.STATE_GAME_PLAY) {
             if (isClicked(mx, my, pauseX, pauseY, pauseW, pauseH)) {
@@ -256,13 +237,10 @@ public class MenuRenderer {
                 gameManager.setGameState(GameManager.STATE_PAUSE);
             }
         } else if (state == GameManager.STATE_PAUSE) {
-
             if (isClicked(mx, my, resumeX, resumeY, resumeW, resumeH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_GAME_PLAY);
-            }
-
-            else if (isClicked(mx, my, homeX, homeY, homeW, homeH)) {
+            } else if (isClicked(mx, my, homeX, homeY, homeW, homeH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.setGameState(GameManager.STATE_LEVEL_SELECT);
             }
@@ -270,8 +248,8 @@ public class MenuRenderer {
             if (isClicked(mx, my, retryX, retryY, retryW, retryH)) {
                 if (gameManager.getClickSound() != null) gameManager.getClickSound().play();
                 gameManager.resetLevel(gameManager.getCurrentLevel(), gameManager.getCurrentBgTex());
+                if (gameCanvas != null) gameCanvas.setLevel(gameManager.getCurrentLevel());
             }
-
         }
         canvas.repaint();
     }

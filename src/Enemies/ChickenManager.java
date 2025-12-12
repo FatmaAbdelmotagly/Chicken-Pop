@@ -1,4 +1,5 @@
 package Enemies;
+
 import com.sun.opengl.util.FPSAnimator;
 import texture.TextureReader;
 import javax.media.opengl.GL;
@@ -56,7 +57,7 @@ public class ChickenManager implements GLEventListener {
 
         gl.glBegin(GL.GL_QUADS);
         gl.glTexCoord2f(0.0f, 0.0f); gl.glVertex3f(x,   y,   -1.0f);
-        gl.glTexCoord2f(1.0f, 0.0f); gl.glVertex3f(x+2 , y, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f); gl.glVertex3f(x+2, y, -1.0f);
         gl.glTexCoord2f(1.0f, 1.0f); gl.glVertex3f(x+2, y+2, -1.0f);
         gl.glTexCoord2f(0.0f, 1.0f); gl.glVertex3f(x,   y+2, -1.0f);
         gl.glEnd();
@@ -95,6 +96,8 @@ public class ChickenManager implements GLEventListener {
     @Override
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
+
+        if (chickensGroup == null) return;
 
         gl.glLoadIdentity();
         animationIndex %= 4;

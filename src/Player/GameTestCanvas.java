@@ -1,46 +1,62 @@
 package Player;
-import com.sun.opengl.util.GLUT;
 
+import com.sun.opengl.util.GLUT;
 import Enemies.ChickenManager;
 import javax.media.opengl.*;
-
 import Enemies.Chickens;
 import com.sun.opengl.util.FPSAnimator;
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
-
 import java.io.File;
 import java.util.List;
+import Game.GameManager;
 
 public class GameTestCanvas extends GLCanvas implements GLEventListener {
-    private int level;
+
+    private int level = 0;
     private SpaceShip ship;
     private Controls controls;
-    private FPSAnimator animator;
+    private com.sun.opengl.util.FPSAnimator animator;
     private ChickenManager chickenManager;
     private int score = 0;
     private GLUT glut = new GLUT();
 
     private Texture background;
+    private final GameManager gameManager;
 
-    public GameTestCanvas(SpaceShip ship, Controls controls ) {
+    public GameTestCanvas(GameManager gameManager, SpaceShip ship, Controls controls ) {
+        this.gameManager = gameManager;
         this.ship = ship;
         this.controls = controls;
-        this.level = level;
+
         chickenManager = new ChickenManager();
-        chickenManager.level(1);
+
 
         addGLEventListener(this);
     }
 
-    @Override
+    public void setLevel(int lvl) {
+        this.level = lvl;
 
+
+        chickenManager = new ChickenManager();
+        chickenManager.level(lvl);
+
+
+        if (ship != null) {
+            ship.setBulletsCount(lvl);
+        }
+
+        score = 0;
+    }
+
+    @Override
     public void init(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
         try {
             background = TextureIO.newTexture(
-                    new File("src/assets/back2.png"),   // ← غير الاسم لو عندك اسم تاني
+                    new File("src/assets/back2.png"),
                     true
             );
         } catch (Exception e) {
@@ -58,11 +74,16 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
-
         GL gl = drawable.getGL();
+
+
+        if (level <= 0) {
+            return;
+        }
 
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
+
         if (background != null) {
             background.enable();
             background.bind();
@@ -79,12 +100,15 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
             gl.glEnd();
 
             background.disable();
+
+
             controls.handleKeyPress(ship);
             gl.glEnable(GL.GL_TEXTURE_2D);
             chickenManager.display(drawable);
 
             List<Bullet> bullets = controls.bullets;
-            for (Bullet b : bullets) {
+            for (int bi = 0; bi < bullets.size(); bi++) {
+                Bullet b = bullets.get(bi);
                 if (b.isActive()) {
                     b.update();
                     b.draw(gl);
@@ -118,13 +142,13 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
                         chickens.remove(j);
                         bullets.remove(i);
                         score += 5;
+                        gameManager.setCurrentScore(score);
                         System.out.println("Score = " + score);
                         i--;
                         break;
                     }
                 }
             }
-
 
             ship.draw(gl);
 
@@ -133,19 +157,12 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
             gl.glRasterPos2f(-0.95f, 0.9f);
             glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Score: " + score);
             gl.glEnable(GL.GL_TEXTURE_2D);
-
         }
-
-
     }
 
     @Override
-    public void reshape(GLAutoDrawable glAutoDrawable, int i, int i1, int i2, int i3) {
-
-    }
+    public void reshape(GLAutoDrawable glAutoDrawable, int i, int i1, int i2, int i3) {}
 
     @Override
-    public void displayChanged(GLAutoDrawable glAutoDrawable, boolean b, boolean b1) {
-
-    }
+    public void displayChanged(GLAutoDrawable glAutoDrawable, boolean b, boolean b1) {}
 }
