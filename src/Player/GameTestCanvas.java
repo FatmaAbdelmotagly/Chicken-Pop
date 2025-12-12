@@ -50,7 +50,7 @@ rocks=new rockManager();
             ship.setBulletsCount(lvl);
         }
 
-        controls.level = lvl;   // ← أهم سطر
+        controls.level = lvl;
 
         score = 0;
     }

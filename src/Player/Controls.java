@@ -20,7 +20,7 @@ public class Controls implements KeyListener {
         this.bulletImagePath = bulletImagePath;
     }
 
-    //  ⭐⭐⭐ جديد ⭐⭐⭐
+
     public void setLevel(int level) {
         if (level < 1) level = 1;
         if (level > 3) level = 3;
