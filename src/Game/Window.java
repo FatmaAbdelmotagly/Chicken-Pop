@@ -84,7 +84,9 @@ public class Window {
                     }
                     try {
                         Thread.sleep(100);
-                    } catch (InterruptedException ex) { /* ignore */ }
+                    } catch (InterruptedException ex) {
+
+                    }
                 }
             }).start();
 

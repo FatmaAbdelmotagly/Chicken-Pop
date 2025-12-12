@@ -15,7 +15,7 @@ public class rockManager implements GLEventListener {
     int textures[] = new int[textureNames.length];
 
     int x = constants.FRAME_WIDTH/2, y = constants.FRAME_HEIGHT/2;
-    private int rock = 6;
+    private int rock = 4;
     private int[]  rockX =  new int[rock];
     private int[]  rockY =  new int[rock];
     private float scale=1;
@@ -105,7 +105,7 @@ public class rockManager implements GLEventListener {
     }
 
     public void UpdateRock(int y , int i){
-        rockY[i]-=10;
+        rockY[i]-=6;
         if(rockY[i]<0 ){
             rockY[i]=constants.FRAME_HEIGHT+(int)(Math.random()*100);
             rockX[i] = 10+(int)(Math.random()*constants.FRAME_WIDTH);

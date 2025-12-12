@@ -28,7 +28,7 @@ public class GameTestCanvas extends GLCanvas implements GLEventListener {
     private final GameManager gameManager;
     private Texture heartTexture;
     private Texture gameOverTexture;
-
+    private Texture winTexture;
     public GameTestCanvas(GameManager gameManager, SpaceShip ship, Controls controls ) {
         this.gameManager = gameManager;
         this.ship = ship;
@@ -77,6 +77,15 @@ rocks=new rockManager();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            winTexture = TextureIO.newTexture(
+                    new File("src/assets/win.png"),
+                    true
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         ship.init(gl);
         chickenManager.init(drawable);
         rocks.init(drawable);
@@ -139,6 +148,10 @@ rocks.display(drawable);
             bullets.removeIf(b -> !b.isActive());
 
             List<Chickens> chickens = chickenManager.getChickens();
+            if (chickens == null || chickens.isEmpty()) {
+                drawWin(gl);
+                return;
+            }
 
             for (int i = 0; i < bullets.size(); i++) {
                 Bullet b = bullets.get(i);
@@ -269,6 +282,32 @@ rocks.display(drawable);
 
         gameOverTexture.disable();
     }
+    private void drawWin(GL gl) {
+        if (winTexture == null) return;
+
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+
+        winTexture.enable();
+        winTexture.bind();
+
+        float w = 0.6f;
+        float h = 0.3f;
+
+        gl.glBegin(GL.GL_QUADS);
+
+        gl.glTexCoord2f(0, 1); gl.glVertex2f(-w/2, -h/2);
+        gl.glTexCoord2f(1, 1); gl.glVertex2f( w/2, -h/2);
+        gl.glTexCoord2f(1, 0); gl.glVertex2f( w/2,  h/2);
+        gl.glTexCoord2f(0, 0); gl.glVertex2f(-w/2,  h/2);
+
+        gl.glEnd();
+
+        winTexture.disable();
+        gl.glDisable(GL.GL_BLEND);
+    }
+
+
     @Override
     public void reshape(GLAutoDrawable glAutoDrawable, int i, int i1, int i2, int i3) {}
 
